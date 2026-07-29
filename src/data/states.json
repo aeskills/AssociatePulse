@@ -1,0 +1,23 @@
+[
+  {
+    "id": "up",
+    "name": "Uttar Pradesh",
+    "abbreviation": "UP",
+    "trainerCount": 9,
+    "color": "#dc2626"
+  },
+  {
+    "id": "delhi",
+    "name": "Delhi",
+    "abbreviation": "DL",
+    "trainerCount": 2,
+    "color": "#dc2626"
+  },
+  {
+    "id": "goa",
+    "name": "Goa",
+    "abbreviation": "GA",
+    "trainerCount": 1,
+    "color": "#dc2626"
+  }
+]

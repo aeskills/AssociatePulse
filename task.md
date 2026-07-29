@@ -1,0 +1,41 @@
+# Tasks
+
+- `[x]` Update CSS tokens and style system in `src/index.css`
+- `[x]` Refactor `src/App.tsx` layout shell structure and sidebar toggle state
+- `[x]` Redesign `src/components/layout/Sidebar.tsx` (responsiveness, transitions, states)
+- `[x]` Redesign `src/components/layout/Navbar.tsx` (topbar, search behavior, mobile toggle)
+- `[x]` Update `src/pages/StateSelector.tsx` with welcome banner, action grids, and branch lists
+- `[x]` Update `src/pages/workspace/TrainerWorkspace.tsx` and workspace tabs
+- `[x]` Remove login dropdown, workspace role switcher, logout actions, and Admin greetings
+- `[x]` Remove notification bell icon and menu dropdown
+- `[x]` Remove Google Sheets option from Sidebar and Breadcrumbs
+- `[x]` Remove GoogleSheetsPage.tsx and `/sheets` route in main.tsx
+- `[x]` Create `googleSheets.ts` service for POST webhook requests
+- `[x]` Integrate `logActivity` calls into useAppStore actions
+- `[x]` Create `.env` template file
+- `[x]` Add global "+ Add Trainer" onboarding Modal to StateSelector dashboard
+- `[x]` Support dynamic creation of new state branches inside App Store and dashboard UI
+- `[x]` Fix SchoolSelect dropdown clipping bug caused by Card overflow hidden
+- `[x]` Build CustomSelect UI dropdown component to replace all native select dropdowns
+- `[x]` Replace native select dropdowns in StateSelector, SchoolDetailsTab, and FeedbackTab with CustomSelect
+- `[x]` Redesign Daily Check-In Portal in AttendanceTab with simplified 3-tab layout (Present, Absent, Leave)
+- `[x]` Configure local browser state persistence (using Zustand persist middleware) to preserve logged check-ins across page reloads
+- `[x]` Rename all Trainer references to Project Associate / Associate, and rebrand app name to AssociatePulse
+- `[x]` Remove top header Navbar and Breadcrumbs completely from the application layout
+- `[x]` Restructure Welcome Banner to bleed edge-to-edge, forming a premium "F"-shaped visual layout
+- `[x]` Remove bottom curve (border-radius) from the welcome banner header block
+- `[x]` Add a floating mobile drawer menu toggle button
+- `[x]` Style welcome stats as distinct glassmorphic stat-boxes aligning numbers above labels
+- `[x]` Generate stunning AI background graphic showing project associate teaching a student Adobe Express
+- `[x]` Create a fully-animated fullscreen Landing Page at the root route `/` introducing Adobe Express for Education program
+- `[x]` Bind a glowing call-to-action button in the bottom right corner of the Landing Page navigating into the ERP
+- `[x]` Nest all ERP dashboard views and navigation links under the `/dashboard` route prefix namespace
+- `[x]` Set realistic photo image as static single background
+- `[x]` Remove dark card boxes from text overlays, placing elements directly on background with custom drop-shadows
+- `[x]` Implement horizontal dark-gradient overlay fading from left to transparent on the right
+- `[x]` Beautify the "Enter Portal" button with neon back-glow effect, hover scale, sliding shimmer light, and letter-spaced typography
+- `[x]` Replace all occurrences of Branch / Branches with State / States across the ERP application text fields
+- `[x]` Correct workspace tab navigation links in WorkspaceTabs.tsx to include the /dashboard path prefix
+- `[x]` Add clear Back / Exit Portal navigation buttons on StateSelector, TrainerList, and TrainerWorkspace screens
+- `[x]` Nest back navigation buttons inline inside header rows/cards to preserve vertical screen space and prevent navbar-like whitespace gaps
+- `[x]` Verify application builds correctly and test layout responsiveness

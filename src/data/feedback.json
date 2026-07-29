@@ -1,0 +1,47 @@
+[
+  {
+    "id": "fb-01",
+    "trainerId": "t1",
+    "date": "2026-07-16",
+    "highlight": "Delivered interactive smart classroom sessions successfully. Student attendance was above 95% today.",
+    "lowlight": "Computer lab internet was slightly slow during testing.",
+    "challenges": "Required manual assistance to reboot projection systems.",
+    "hasComplaint": true,
+    "complaintCategory": "Infrastructure",
+    "complaintSeverity": "Medium",
+    "complaintDescription": "Projector unit lens is dusty, needs maintenance kit.",
+    "suggestions": "Provide basic cleaning cloth for IT lab screens.",
+    "overallExperience": "Good",
+    "mood": "Good"
+  },
+  {
+    "id": "fb-02",
+    "trainerId": "t1",
+    "date": "2026-07-15",
+    "highlight": "Completed registration sheets for all KGBV girl students. Smooth cooperation from school coordinators.",
+    "lowlight": "Slight delay in starting session due to morning assembly scheduling.",
+    "challenges": "None",
+    "hasComplaint": false,
+    "complaintCategory": "",
+    "complaintSeverity": "",
+    "complaintDescription": "",
+    "suggestions": "None",
+    "overallExperience": "Excellent",
+    "mood": "Excellent"
+  },
+  {
+    "id": "fb-03",
+    "trainerId": "t2",
+    "date": "2026-07-16",
+    "highlight": "Finished inspection profile validation for Mavli girls high school infrastructure.",
+    "lowlight": "A few class hours were shortened due to mid-term exam arrangements.",
+    "challenges": "Coordinating library access during regular hours.",
+    "hasComplaint": false,
+    "complaintCategory": "",
+    "complaintSeverity": "",
+    "complaintDescription": "",
+    "suggestions": "Introduce offline sync tools for mobile check-ins.",
+    "overallExperience": "Good",
+    "mood": "Good"
+  }
+]

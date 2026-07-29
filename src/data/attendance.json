@@ -1,0 +1,72 @@
+[
+  {
+    "id": "att-01",
+    "trainerId": "t1",
+    "date": "2026-07-16",
+    "checkIn": "09:02:15",
+    "checkOut": "17:35:40",
+    "workingHours": "8.5",
+    "status": "present",
+    "geoTag": { "lat": 26.7846, "lng": 75.7688 }
+  },
+  {
+    "id": "att-02",
+    "trainerId": "t1",
+    "date": "2026-07-15",
+    "checkIn": "08:58:30",
+    "checkOut": "17:05:10",
+    "workingHours": "8.1",
+    "status": "present",
+    "geoTag": { "lat": 26.9430, "lng": 75.7483 }
+  },
+  {
+    "id": "att-03",
+    "trainerId": "t1",
+    "date": "2026-07-14",
+    "checkIn": "09:15:20",
+    "checkOut": "18:02:00",
+    "workingHours": "8.7",
+    "status": "present",
+    "geoTag": { "lat": 26.7845, "lng": 75.7689 }
+  },
+  {
+    "id": "att-04",
+    "trainerId": "t1",
+    "date": "2026-07-13",
+    "checkIn": "08:55:00",
+    "checkOut": "17:15:00",
+    "workingHours": "8.3",
+    "status": "present",
+    "geoTag": { "lat": 27.2140, "lng": 75.8120 }
+  },
+  {
+    "id": "att-05",
+    "trainerId": "t1",
+    "date": "2026-07-12",
+    "checkIn": null,
+    "checkOut": null,
+    "workingHours": "0",
+    "status": "on_leave",
+    "geoTag": null
+  },
+  {
+    "id": "att-06",
+    "trainerId": "t2",
+    "date": "2026-07-16",
+    "checkIn": "08:45:00",
+    "checkOut": "17:10:00",
+    "workingHours": "8.4",
+    "status": "present",
+    "geoTag": { "lat": 24.6415, "lng": 73.7220 }
+  },
+  {
+    "id": "att-07",
+    "trainerId": "t6",
+    "date": "2026-07-16",
+    "checkIn": "09:05:00",
+    "checkOut": "17:30:00",
+    "workingHours": "8.4",
+    "status": "present",
+    "geoTag": { "lat": 23.0488, "lng": 72.5310 }
+  }
+]
