@@ -103,6 +103,10 @@ export interface SchoolDetailsRecord {
   schoolId: string;
   principalName: string;
   principalContact: string;
+  spoc1Name?: string;
+  spoc1Contact?: string;
+  spoc2Name?: string;
+  spoc2Contact?: string;
   totalTeachers: number;
   totalStudents: number;
   totalWorkingComputers: number;

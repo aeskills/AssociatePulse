@@ -19,6 +19,10 @@ import { getToday, formatDate, cn } from '../../lib/utils';
 const schema = z.object({
   principalName: z.string().min(1, 'Principal name is required'),
   principalContact: z.string().regex(/^\d{10}$/, 'Must be a valid 10-digit contact number'),
+  spoc1Name: z.string().min(1, 'SPOC 1 name is required'),
+  spoc1Contact: z.string().regex(/^\d{10}$/, 'Must be a valid 10-digit contact number'),
+  spoc2Name: z.string().optional(),
+  spoc2Contact: z.string().optional().refine((val) => !val || /^\d{10}$/.test(val), 'Must be a valid 10-digit contact number'),
   totalTeachers: z.coerce.number().min(0, 'Cannot be negative'),
   totalStudents: z.coerce.number().min(0, 'Cannot be negative'),
   totalWorkingComputers: z.coerce.number().min(0, 'Cannot be negative'),
@@ -99,6 +103,10 @@ export default function SchoolDetailsTab() {
     reset({
       principalName: schoolSavedDetails?.principalName || '',
       principalContact: schoolSavedDetails?.principalContact || '',
+      spoc1Name: schoolSavedDetails?.spoc1Name || '',
+      spoc1Contact: schoolSavedDetails?.spoc1Contact || '',
+      spoc2Name: schoolSavedDetails?.spoc2Name || '',
+      spoc2Contact: schoolSavedDetails?.spoc2Contact || '',
       totalTeachers: schoolSavedDetails?.totalTeachers || 0,
       totalStudents: schoolSavedDetails?.totalStudents || 0,
       totalWorkingComputers: schoolSavedDetails?.totalWorkingComputers || 0,
@@ -132,6 +140,10 @@ export default function SchoolDetailsTab() {
           // Pre-fill form values from GSheet All School Report
           if (reportData.principalName) setValue('principalName', reportData.principalName);
           if (reportData.principalContact) setValue('principalContact', reportData.principalContact);
+          if (reportData.spoc1Name) setValue('spoc1Name', reportData.spoc1Name);
+          if (reportData.spoc1Contact) setValue('spoc1Contact', reportData.spoc1Contact);
+          if (reportData.spoc2Name) setValue('spoc2Name', reportData.spoc2Name);
+          if (reportData.spoc2Contact) setValue('spoc2Contact', reportData.spoc2Contact);
           if (reportData.totalTeachers !== undefined) setValue('totalTeachers', Number(reportData.totalTeachers) || 0);
           if (reportData.totalStudents !== undefined) setValue('totalStudents', Number(reportData.totalStudents) || 0);
           if (reportData.totalWorkingComputers !== undefined) setValue('totalWorkingComputers', Number(reportData.totalWorkingComputers) || 0);
@@ -170,6 +182,10 @@ export default function SchoolDetailsTab() {
       udiseCode: selectedSchool.udiseCode,
       principalName: data.principalName,
       principalContact: data.principalContact,
+      spoc1Name: data.spoc1Name,
+      spoc1Contact: data.spoc1Contact,
+      spoc2Name: data.spoc2Name || '',
+      spoc2Contact: data.spoc2Contact || '',
       totalTeachers: data.totalTeachers,
       totalStudents: data.totalStudents,
       totalWorkingComputers: data.totalWorkingComputers,
@@ -288,29 +304,57 @@ export default function SchoolDetailsTab() {
                 </div>
               </div>
 
-              {/* Row 2: Total Teacher, Total Students, Total Working Computers */}
+              {/* Row 2: SPOC 1 Details */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+                <div>
+                  <label className={labelClass}>3. SPOC 1 Name <span className="text-red-500">*</span></label>
+                  <input type="text" {...register('spoc1Name')} placeholder="Enter SPOC 1 Name..." className={inputClass} />
+                  {errors.spoc1Name && <p className={errorClass}>{errors.spoc1Name.message}</p>}
+                </div>
+                <div>
+                  <label className={labelClass}>4. SPOC 1 Contact Number <span className="text-red-500">*</span></label>
+                  <input type="text" {...register('spoc1Contact')} placeholder="10-digit mobile number..." className={inputClass} />
+                  {errors.spoc1Contact && <p className={errorClass}>{errors.spoc1Contact.message}</p>}
+                </div>
+              </div>
+
+              {/* Row 3: SPOC 2 Details (Optional) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+                <div>
+                  <label className={labelClass}>5. SPOC 2 Name <span className="text-slate-400 font-semibold">(Optional)</span></label>
+                  <input type="text" {...register('spoc2Name')} placeholder="Enter SPOC 2 Name (optional)..." className={inputClass} />
+                  {errors.spoc2Name && <p className={errorClass}>{errors.spoc2Name.message}</p>}
+                </div>
+                <div>
+                  <label className={labelClass}>6. SPOC 2 Contact Number <span className="text-slate-400 font-semibold">(Optional)</span></label>
+                  <input type="text" {...register('spoc2Contact')} placeholder="10-digit mobile number (optional)..." className={inputClass} />
+                  {errors.spoc2Contact && <p className={errorClass}>{errors.spoc2Contact.message}</p>}
+                </div>
+              </div>
+
+              {/* Row 4: Total Teacher, Total Students, Total Working Computers */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-100 pt-4">
                 <div>
-                  <label className={labelClass}>3. Total Teacher <span className="text-red-500">*</span></label>
+                  <label className={labelClass}>7. Total Teacher <span className="text-red-500">*</span></label>
                   <input type="number" min="0" {...register('totalTeachers')} className={inputClass} />
                   {errors.totalTeachers && <p className={errorClass}>{errors.totalTeachers.message}</p>}
                 </div>
                 <div>
-                  <label className={labelClass}>4. Total Students <span className="text-red-500">*</span></label>
+                  <label className={labelClass}>8. Total Students <span className="text-red-500">*</span></label>
                   <input type="number" min="0" {...register('totalStudents')} className={inputClass} />
                   {errors.totalStudents && <p className={errorClass}>{errors.totalStudents.message}</p>}
                 </div>
                 <div>
-                  <label className={labelClass}>5. Total Working Computers <span className="text-red-500">*</span></label>
+                  <label className={labelClass}>9. Total Working Computers <span className="text-red-500">*</span></label>
                   <input type="number" min="0" {...register('totalWorkingComputers')} className={inputClass} />
                   {errors.totalWorkingComputers && <p className={errorClass}>{errors.totalWorkingComputers.message}</p>}
                 </div>
               </div>
 
-              {/* Row 3: Internet facility & Smart Class */}
+              {/* Row 5: Internet facility & Smart Class */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 border-t border-slate-100 pt-4">
                 <div>
-                  <label className={labelClass}>6. Internet Facility <span className="text-red-500">*</span></label>
+                  <label className={labelClass}>10. Internet Facility <span className="text-red-500">*</span></label>
                   <CustomSelect
                     options={['WiFi', 'LAN Connection', 'Dongle']}
                     value={formValues.internetFacility || 'WiFi'}
@@ -318,7 +362,7 @@ export default function SchoolDetailsTab() {
                   />
                 </div>
                 <div>
-                  <label className={labelClass}>7. Smart Class <span className="text-red-500">*</span></label>
+                  <label className={labelClass}>11. Smart Class <span className="text-red-500">*</span></label>
                   <div className="flex items-center gap-6 mt-2">
                     {['Yes', 'No'].map((option) => (
                       <label key={option} className="flex items-center gap-2 font-extrabold text-sm text-slate-800 cursor-pointer">
@@ -336,9 +380,9 @@ export default function SchoolDetailsTab() {
                 </div>
               </div>
 
-              {/* Row 4: Remark (optional) */}
+              {/* Row 6: Remark (optional) */}
               <div className="border-t border-slate-100 pt-4">
-                <label className={labelClass}>8. Remark <span className="text-slate-400 font-normal text-xs">(optional)</span></label>
+                <label className={labelClass}>12. Remark <span className="text-slate-400 font-normal text-xs">(optional)</span></label>
                 <textarea
                   {...register('remark')}
                   rows={3}
