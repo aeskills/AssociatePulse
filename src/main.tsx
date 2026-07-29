@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createHashRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import App from './App';
 import LandingPage from './pages/LandingPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -18,7 +18,7 @@ try {
   });
 } catch (e) {}
 
-const router = createHashRouter([
+const router = createBrowserRouter([
   {
     path: '/',
     element: <LandingPage />
@@ -83,7 +83,9 @@ const router = createHashRouter([
     path: '*',
     element: <Navigate to="/" replace />
   }
-]);
+], {
+  basename: '/AssociatePulse'
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
