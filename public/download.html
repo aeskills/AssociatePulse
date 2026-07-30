@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Download AssociatePulse App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="apple-touch-icon" href="/AssociatePulse/apple-touch-icon.png" />
@@ -12,335 +12,360 @@
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+    html {
+      height: 100%;
+      -webkit-text-size-adjust: 100%;
+    }
+
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      min-height: 100vh;
+      min-height: 100%;
+      min-height: 100dvh;
       background: #0f172a;
       color: #f8fafc;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Background — fixed, no animation on mobile to avoid jank */
+    .bg-glow {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 30% 20%, rgba(124,58,237,0.18) 0%, transparent 60%),
+                  radial-gradient(ellipse at 75% 70%, rgba(244,63,94,0.12) 0%, transparent 60%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      top: -50%; left: -50%;
-      width: 200%; height: 200%;
-      background: radial-gradient(circle at 30% 40%, rgba(124,58,237,0.15) 0%, transparent 50%),
-                  radial-gradient(circle at 70% 60%, rgba(244,63,94,0.1) 0%, transparent 50%);
-      animation: bgFloat 20s ease-in-out infinite;
-      z-index: 0;
-    }
-
-    @keyframes bgFloat {
-      0%, 100% { transform: translate(0,0) rotate(0deg); }
-      33% { transform: translate(30px,-20px) rotate(1deg); }
-      66% { transform: translate(-20px,20px) rotate(-1deg); }
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
     }
 
     .container {
-      position: relative; z-index: 1;
       text-align: center;
-      padding: 2rem 1.25rem;
-      max-width: 460px; width: 100%;
+      padding: 2.5rem 1.25rem;
+      max-width: 420px;
+      width: 100%;
+      margin: 0 auto;
     }
 
+    /* App Icon */
     .app-icon {
-      width: 96px; height: 96px;
-      border-radius: 22px;
-      margin: 0 auto 1.25rem;
+      width: 80px; height: 80px;
+      border-radius: 20px;
+      margin: 0 auto 1rem;
       background: linear-gradient(135deg, #7c3aed, #f43f5e);
       display: flex; align-items: center; justify-content: center;
-      font-size: 38px; font-weight: 900; color: white;
-      box-shadow: 0 16px 50px rgba(124,58,237,0.4);
-      animation: iconFloat 3s ease-in-out infinite;
-    }
-
-    @keyframes iconFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
+      font-size: 32px; font-weight: 900; color: white;
+      box-shadow: 0 12px 40px rgba(124,58,237,0.35);
     }
 
     h1 {
-      font-size: 1.85rem; font-weight: 800; margin-bottom: 0.4rem;
+      font-size: 1.6rem; font-weight: 800; margin-bottom: 0.35rem;
       background: linear-gradient(135deg, #e2e8f0, #fff);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
-    .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.75rem; line-height: 1.5; }
+    .subtitle {
+      color: #94a3b8; font-size: 0.85rem;
+      margin-bottom: 1.5rem; line-height: 1.5;
+    }
+
+    .detected {
+      display: inline-block;
+      background: rgba(124,58,237,0.15); color: #a78bfa;
+      font-size: 0.72rem; font-weight: 600;
+      padding: 0.2rem 0.65rem; border-radius: 100px;
+      margin-bottom: 1.25rem;
+    }
 
     /* QR Section */
     .qr-section {
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 20px; padding: 1.5rem;
-      margin-bottom: 1.5rem; backdrop-filter: blur(10px);
+      border-radius: 16px; padding: 1.25rem;
+      margin-bottom: 1.25rem;
     }
 
     .qr-section h3 {
-      font-size: 0.8rem; font-weight: 600; color: #94a3b8;
-      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;
+      font-size: 0.75rem; font-weight: 600; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;
     }
 
     .qr-code {
-      background: white; border-radius: 14px;
-      padding: 14px; display: inline-block; margin-bottom: 0.5rem;
+      background: white; border-radius: 12px;
+      padding: 12px; display: inline-block; margin-bottom: 0.4rem;
     }
 
-    .qr-code img { display: block; width: 170px; height: 170px; }
-    .qr-hint { font-size: 0.78rem; color: #64748b; }
+    .qr-code img { display: block; width: 160px; height: 160px; }
+    .qr-hint { font-size: 0.75rem; color: #64748b; }
 
     /* Buttons */
-    .buttons { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .buttons {
+      display: flex; flex-direction: column;
+      gap: 0.6rem; margin-bottom: 1.25rem;
+    }
 
     .btn {
-      display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-      padding: 0.9rem 1.25rem; border-radius: 14px;
-      font-size: 0.95rem; font-weight: 600; text-decoration: none;
-      transition: all 0.3s ease; cursor: pointer; border: none;
-      font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+      padding: 0.85rem 1rem; border-radius: 12px;
+      font-size: 0.9rem; font-weight: 600; text-decoration: none;
+      transition: all 0.2s ease; cursor: pointer; border: none;
+      font-family: inherit; width: 100%;
+      -webkit-tap-highlight-color: transparent;
     }
+
+    .btn:active { transform: scale(0.97); }
 
     .btn-android {
       background: linear-gradient(135deg, #7c3aed, #a855f7);
-      color: white; box-shadow: 0 8px 30px rgba(124,58,237,0.3);
+      color: white; box-shadow: 0 6px 24px rgba(124,58,237,0.3);
     }
-    .btn-android:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(124,58,237,0.5); }
 
     .btn-ios {
       background: linear-gradient(135deg, #1e293b, #334155);
-      color: #f8fafc; border: 1px solid rgba(255,255,255,0.15);
+      color: #f8fafc; border: 1px solid rgba(255,255,255,0.12);
     }
-    .btn-ios:hover { transform: translateY(-2px); background: linear-gradient(135deg, #334155, #475569); }
 
-    .btn-icon { font-size: 1.3rem; }
+    .btn-icon { font-size: 1.2rem; flex-shrink: 0; }
+
+    /* iOS Banner */
+    .ios-banner {
+      display: none;
+      background: linear-gradient(135deg, rgba(124,58,237,0.18), rgba(244,63,94,0.12));
+      border: 1px solid rgba(124,58,237,0.25);
+      border-radius: 14px; padding: 0.85rem 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .ios-banner p { font-size: 0.82rem; color: #c4b5fd; line-height: 1.5; }
+    .ios-banner strong { color: #e9d5ff; }
 
     /* iOS Install Guide Card */
     .ios-guide {
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 20px; padding: 1.5rem;
+      border-radius: 16px; padding: 1.25rem;
       text-align: left;
       display: none;
-      animation: slideDown 0.4s ease;
     }
 
     .ios-guide.show { display: block; }
 
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
     .ios-guide-header {
-      display: flex; align-items: center; gap: 0.6rem;
-      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 0.85rem; flex-wrap: wrap;
     }
 
-    .ios-guide-header h3 { font-size: 1.05rem; font-weight: 700; color: #e2e8f0; }
+    .ios-guide-header h3 { font-size: 0.95rem; font-weight: 700; color: #e2e8f0; }
 
     .ios-guide-header .badge {
       background: rgba(52,211,153,0.15); color: #34d399;
-      font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem;
-      border-radius: 100px;
+      font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.5rem;
+      border-radius: 100px; white-space: nowrap;
     }
 
     .step {
-      display: flex; gap: 0.75rem; padding: 0.65rem 0;
+      display: flex; gap: 0.65rem; padding: 0.55rem 0;
       align-items: flex-start;
     }
 
     .step + .step { border-top: 1px solid rgba(255,255,255,0.05); }
 
     .step-num {
-      width: 28px; height: 28px; border-radius: 50%;
+      width: 26px; height: 26px; min-width: 26px; border-radius: 50%;
       background: linear-gradient(135deg, #7c3aed, #f43f5e);
-      color: white; font-size: 0.8rem; font-weight: 700;
+      color: white; font-size: 0.75rem; font-weight: 700;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
 
-    .step-text { font-size: 0.88rem; color: #cbd5e1; line-height: 1.55; }
+    .step-text { font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; }
     .step-text strong { color: #f1f5f9; }
 
     .share-icon-inline {
       display: inline-flex; align-items: center; justify-content: center;
-      width: 24px; height: 24px; border-radius: 6px;
-      background: #3b82f6; color: white; font-size: 14px;
+      width: 22px; height: 22px; border-radius: 5px;
+      background: #3b82f6; color: white; font-size: 12px;
       vertical-align: middle; margin: 0 2px;
     }
 
     .safari-btn {
       display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-      margin-top: 1rem; padding: 0.75rem;
+      margin-top: 0.85rem; padding: 0.7rem;
       background: linear-gradient(135deg, #3b82f6, #2563eb);
-      color: white; border-radius: 12px;
-      font-size: 0.9rem; font-weight: 600;
+      color: white; border-radius: 10px;
+      font-size: 0.85rem; font-weight: 600;
       text-decoration: none;
-      box-shadow: 0 6px 20px rgba(59,130,246,0.3);
-      transition: all 0.3s ease;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.25);
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .safari-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(59,130,246,0.4); }
+    .safari-btn:active { transform: scale(0.97); }
 
-    /* iOS Banner for mobile */
-    .ios-banner {
-      display: none;
-      background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(244,63,94,0.15));
-      border: 1px solid rgba(124,58,237,0.3);
-      border-radius: 16px; padding: 1rem 1.25rem;
-      margin-bottom: 1.5rem;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(124,58,237,0.2); }
-      50% { box-shadow: 0 0 0 8px rgba(124,58,237,0); }
-    }
-
-    .ios-banner p { font-size: 0.85rem; color: #c4b5fd; line-height: 1.5; }
-    .ios-banner strong { color: #e9d5ff; }
-
-    .detected {
-      display: inline-block;
-      background: rgba(124,58,237,0.15); color: #a78bfa;
-      font-size: 0.75rem; font-weight: 600;
-      padding: 0.25rem 0.75rem; border-radius: 100px;
-      margin-bottom: 1.5rem;
-    }
-
-    .footer { margin-top: 2rem; font-size: 0.75rem; color: #475569; }
+    .footer { margin-top: 1.75rem; font-size: 0.7rem; color: #475569; }
     .footer a { color: #7c3aed; text-decoration: none; }
 
-    /* Hide sections based on platform */
-    .android-only { display: block; }
+    /* Platform visibility */
+    .android-only { display: flex; }
     .ios-only { display: none; }
 
-    body.is-ios .android-only { display: none; }
-    body.is-ios .ios-only { display: block !important; }
+    body.is-ios .android-only { display: none !important; }
+    body.is-ios .ios-only { display: flex !important; }
     body.is-ios .ios-guide { display: block; }
     body.is-ios .ios-banner { display: block; }
+    body.is-ios .qr-section { display: none; }
 
-    body.is-android .ios-only { display: none; }
-    body.is-android .android-only { display: block; }
+    body.is-android .ios-only { display: none !important; }
+    body.is-android .android-only { display: flex; }
+    body.is-android .qr-section { display: none; }
+
+    /* Responsive — small phones (< 375px) */
+    @media (max-width: 374px) {
+      .container { padding: 2rem 1rem; }
+      h1 { font-size: 1.35rem; }
+      .app-icon { width: 68px; height: 68px; font-size: 28px; border-radius: 16px; }
+      .btn { padding: 0.75rem 0.85rem; font-size: 0.85rem; }
+      .qr-code img { width: 140px; height: 140px; }
+      .step-text { font-size: 0.78rem; }
+      .ios-guide-header h3 { font-size: 0.88rem; }
+    }
+
+    /* Medium phones */
+    @media (min-width: 375px) and (max-width: 480px) {
+      .container { padding: 2rem 1.25rem; }
+    }
+
+    /* Tablets & desktop */
+    @media (min-width: 481px) {
+      .container { padding: 3rem 2rem; }
+      .app-icon { width: 96px; height: 96px; font-size: 38px; border-radius: 22px; }
+      h1 { font-size: 1.85rem; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="app-icon">AP</div>
-    <h1>AssociatePulse</h1>
-    <p class="subtitle">Enterprise field operations management.<br>Install the app on your device.</p>
+  <div class="bg-glow"></div>
 
-    <span class="detected" id="platform-badge"></span>
+  <div class="page-wrapper">
+    <div class="container">
+      <div class="app-icon">AP</div>
+      <h1>AssociatePulse</h1>
+      <p class="subtitle">Enterprise field operations management.<br>Install the app on your device.</p>
 
-    <!-- iOS Smart Banner -->
-    <div class="ios-banner" id="ios-banner">
-      <p>📲 To install <strong>AssociatePulse</strong> on your iPhone, tap the button below to open in Safari, then follow the steps.</p>
+      <span class="detected" id="platform-badge"></span>
+
+      <!-- iOS Smart Banner -->
+      <div class="ios-banner" id="ios-banner">
+        <p>📲 To install <strong>AssociatePulse</strong> on your iPhone, tap the button below to open in Safari, then follow the steps.</p>
+      </div>
+
+      <!-- QR Code (desktop only) -->
+      <div class="qr-section" id="qr-section">
+        <h3>Scan to Install</h3>
+        <div class="qr-code">
+          <img id="qrcode" alt="QR Code to download AssociatePulse" />
+        </div>
+        <p class="qr-hint">Scan with your phone camera</p>
+      </div>
+
+      <!-- Download Buttons -->
+      <div class="buttons">
+        <!-- Android -->
+        <a href="AssociatePulse.apk" class="btn btn-android android-only" id="btn-android" download>
+          <span class="btn-icon">🤖</span>
+          Download for Android (.apk)
+        </a>
+
+        <!-- iOS: Open in Safari button -->
+        <a href="https://aeskills.github.io/AssociatePulse/" class="btn btn-ios ios-only" id="btn-open-safari">
+          <span class="btn-icon">🧭</span>
+          Open App in Safari
+        </a>
+
+        <!-- Toggle buttons for other platform -->
+        <button class="btn btn-ios android-only" id="btn-ios-toggle" onclick="toggleIosGuide()">
+          <span class="btn-icon">🍎</span>
+          Install on iPhone / iPad
+        </button>
+
+        <a href="AssociatePulse.apk" class="btn btn-android ios-only" download>
+          <span class="btn-icon">🤖</span>
+          Download for Android
+        </a>
+      </div>
+
+      <!-- iOS Install Guide -->
+      <div class="ios-guide" id="ios-guide">
+        <div class="ios-guide-header">
+          <h3>📱 Install on iPhone</h3>
+          <span class="badge">No App Store needed</span>
+        </div>
+
+        <div class="step">
+          <span class="step-num">1</span>
+          <span class="step-text">Open <strong>Safari</strong> on your iPhone <em>(must be Safari)</em></span>
+        </div>
+
+        <div class="step">
+          <span class="step-num">2</span>
+          <span class="step-text">Go to <strong>aeskills.github.io/AssociatePulse</strong></span>
+        </div>
+
+        <div class="step">
+          <span class="step-num">3</span>
+          <span class="step-text">Tap the <strong>Share</strong> button <span class="share-icon-inline">↑</span> at the bottom</span>
+        </div>
+
+        <div class="step">
+          <span class="step-num">4</span>
+          <span class="step-text">Tap <strong>"Add to Home Screen"</strong> ➕</span>
+        </div>
+
+        <div class="step">
+          <span class="step-num">5</span>
+          <span class="step-text">Tap <strong>"Add"</strong> — the app will appear on your home screen!</span>
+        </div>
+
+        <a href="https://aeskills.github.io/AssociatePulse/" class="safari-btn">
+          🧭 Open AssociatePulse in Safari
+        </a>
+      </div>
+
+      <p class="footer">Made with ❤️ by <a href="https://aeskills.github.io/AssociatePulse/">AE Skills</a></p>
     </div>
-
-    <!-- QR Code (desktop only) -->
-    <div class="qr-section" id="qr-section">
-      <h3>Scan to Install</h3>
-      <div class="qr-code">
-        <img id="qrcode" alt="QR Code to download AssociatePulse" />
-      </div>
-      <p class="qr-hint">Scan with your phone camera</p>
-    </div>
-
-    <!-- Download Buttons -->
-    <div class="buttons">
-      <!-- Android -->
-      <a href="AssociatePulse.apk" class="btn btn-android android-only" id="btn-android" download>
-        <span class="btn-icon">🤖</span>
-        Download for Android (.apk)
-      </a>
-
-      <!-- iOS: Open in Safari button -->
-      <a href="https://aeskills.github.io/AssociatePulse/" class="btn btn-ios ios-only" id="btn-open-safari">
-        <span class="btn-icon">🧭</span>
-        Open App in Safari
-      </a>
-
-      <!-- Toggle buttons for other platform -->
-      <button class="btn btn-ios android-only" id="btn-ios-toggle" onclick="toggleIosGuide()">
-        <span class="btn-icon">🍎</span>
-        Install on iPhone / iPad
-      </button>
-
-      <a href="AssociatePulse.apk" class="btn btn-android ios-only" download>
-        <span class="btn-icon">🤖</span>
-        Download for Android
-      </a>
-    </div>
-
-    <!-- iOS Install Guide -->
-    <div class="ios-guide" id="ios-guide">
-      <div class="ios-guide-header">
-        <h3>📱 Install on iPhone / iPad</h3>
-        <span class="badge">No App Store needed</span>
-      </div>
-
-      <div class="step">
-        <span class="step-num">1</span>
-        <span class="step-text">Open <strong>Safari</strong> on your iPhone <em>(must be Safari, not Chrome)</em></span>
-      </div>
-
-      <div class="step">
-        <span class="step-num">2</span>
-        <span class="step-text">Go to <strong>aeskills.github.io/AssociatePulse</strong> or tap the blue button above</span>
-      </div>
-
-      <div class="step">
-        <span class="step-num">3</span>
-        <span class="step-text">Tap the <strong>Share</strong> button <span class="share-icon-inline">↑</span> at the bottom of Safari</span>
-      </div>
-
-      <div class="step">
-        <span class="step-num">4</span>
-        <span class="step-text">Scroll down the share menu and tap <strong>"Add to Home Screen"</strong> ➕</span>
-      </div>
-
-      <div class="step">
-        <span class="step-num">5</span>
-        <span class="step-text">Tap <strong>"Add"</strong> in the top right — the <strong>AssociatePulse</strong> app with the AP icon will appear on your home screen!</span>
-      </div>
-
-      <a href="https://aeskills.github.io/AssociatePulse/" class="safari-btn">
-        🧭 Open AssociatePulse in Safari Now
-      </a>
-    </div>
-
-    <p class="footer">Made with ❤️ by <a href="https://aeskills.github.io/AssociatePulse/" target="_blank">AE Skills</a></p>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <script>
     // Generate QR code
-    const downloadPageUrl = 'https://aeskills.github.io/AssociatePulse/download.html';
-    const qr = qrcode(0, 'M');
-    qr.addData(downloadPageUrl);
-    qr.make();
-    document.getElementById('qrcode').src = qr.createDataURL(6, 0);
+    var downloadPageUrl = 'https://aeskills.github.io/AssociatePulse/download.html';
+    var qrGen = qrcode(0, 'M');
+    qrGen.addData(downloadPageUrl);
+    qrGen.make();
+    document.getElementById('qrcode').src = qrGen.createDataURL(6, 0);
 
     // Detect platform
-    const ua = navigator.userAgent;
-    const badge = document.getElementById('platform-badge');
-    const isIOS = /iPad|iPhone|iPod/.test(ua);
-    const isAndroid = /android/i.test(ua);
-    const isMobile = isIOS || isAndroid;
+    var ua = navigator.userAgent;
+    var badge = document.getElementById('platform-badge');
+    var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var isAndroid = /android/i.test(ua);
 
     if (isIOS) {
       document.body.classList.add('is-ios');
       badge.textContent = '🍎 iPhone / iPad Detected';
-      // Hide QR on mobile
-      document.getElementById('qr-section').style.display = 'none';
     } else if (isAndroid) {
       document.body.classList.add('is-android');
       badge.textContent = '🤖 Android Detected';
-      document.getElementById('qr-section').style.display = 'none';
     } else {
       badge.textContent = '💻 Scan QR code from your phone';
     }
