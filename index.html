@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <title>AssociatePulse ERP — Field Operations Dashboard</title>
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <!-- GitHub Pages SPA Redirect Restorer -->
     <script type="text/javascript">
       (function(l) {
@@ -20,6 +24,13 @@
           );
         }
       }(window.location));
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('sw.js').catch(function(e) {
+            console.log('SW registration failed:', e);
+          });
+        });
+      }
     </script>
     <script type="module" crossorigin src="/AssociatePulse/assets/index-C5Xh0-P4.js"></script>
     <link rel="stylesheet" crossorigin href="/AssociatePulse/assets/index-l4jefnJi.css">

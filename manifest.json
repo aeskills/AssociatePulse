@@ -1,21 +1,20 @@
 {
-  "name": "AssociatePulse ERP — Field Operations",
+  "name": "AssociatePulse ERP",
   "short_name": "AssociatePulse",
-  "description": "Enterprise field operations management system for trainers and project associates",
+  "description": "Enterprise field operations management system for project associates",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0f172a",
-  "theme_color": "#dc2626",
-  "orientation": "portrait",
+  "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "pwa-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "pwa-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
