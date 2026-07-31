@@ -449,9 +449,9 @@ function updateAllSchoolReportSheet(ss, trainerName, stateName, data) {
   if (!master) {
     master = ss.insertSheet("All School Report", 0);
     var headers = [
-      ["Date", "State", "District", "Trainer Name", "School Name", "UDISE Code", "Principal Name", "Principal Contact", "Total Teachers", "Total Students", "Working PCs", "Internet", "Smart Class", "Infra Rating", "Mgmt Rating", "Engagement Rating", "Remarks"]
+      ["Date", "State", "District", "Trainer Name", "School Name", "UDISE Code", "Principal Name", "Principal Contact", "SPOC 1 Name", "SPOC 1 Contact", "SPOC 2 Name", "SPOC 2 Contact", "Total Teachers", "Total Students", "Working PCs", "Internet", "Smart Class", "Infra Rating", "Mgmt Rating", "Engagement Rating", "Remarks"]
     ];
-    master.getRange(1, 1, 1, 17).setValues(headers).setBackground("#0f172a").setFontColor("#ffffff").setFontWeight("bold");
+    master.getRange(1, 1, 1, 21).setValues(headers).setBackground("#0f172a").setFontColor("#ffffff").setFontWeight("bold");
     master.setFrozenRows(1);
   }
 
@@ -461,7 +461,7 @@ function updateAllSchoolReportSheet(ss, trainerName, stateName, data) {
   var udiseClean = String(data.udiseCode || "").trim();
 
   if (lastRow > 1) {
-    var values = master.getRange(2, 1, lastRow - 1, 17).getValues();
+    var values = master.getRange(2, 1, lastRow - 1, 21).getValues();
     for (var i = 0; i < values.length; i++) {
       var rowUDISE = String(values[i][5] || "").trim();                 // Column F (UDISE Code)
       var rowSchoolName = String(values[i][4] || "").trim().toLowerCase(); // Column E (School Name)
@@ -479,8 +479,10 @@ function updateAllSchoolReportSheet(ss, trainerName, stateName, data) {
     }
   }
 
+  var totStudentsVal = data.totalStudents !== undefined ? data.totalStudents : data.totalStudentsTrained;
+
   if (targetRow === -1) {
-    // New School: Append 1 Row
+    // New School: Append 1 Row (21 Columns)
     master.appendRow([
       data.dateStr || getFormattedDate(),
       stateName,
@@ -490,8 +492,12 @@ function updateAllSchoolReportSheet(ss, trainerName, stateName, data) {
       data.udiseCode || '',
       data.principalName || '',
       data.principalContact || '',
+      data.spoc1Name || '',
+      data.spoc1Contact || '',
+      data.spoc2Name || '',
+      data.spoc2Contact || '',
       data.totalTeachers !== undefined ? data.totalTeachers : '',
-      data.totalStudents !== undefined ? data.totalStudents : '',
+      totStudentsVal !== undefined ? totStudentsVal : '',
       data.totalWorkingComputers !== undefined ? data.totalWorkingComputers : '',
       data.internetFacility || '',
       data.smartClass || '',
@@ -510,15 +516,19 @@ function updateAllSchoolReportSheet(ss, trainerName, stateName, data) {
     if (data.udiseCode) setCell(6, data.udiseCode);
     if (data.principalName) setCell(7, data.principalName);
     if (data.principalContact) setCell(8, data.principalContact);
-    if (data.totalTeachers !== undefined) setCell(9, data.totalTeachers);
-    if (data.totalStudents !== undefined) setCell(10, data.totalStudents);
-    if (data.totalWorkingComputers !== undefined) setCell(11, data.totalWorkingComputers);
-    if (data.internetFacility) setCell(12, data.internetFacility);
-    if (data.smartClass) setCell(13, data.smartClass);
-    if (data.ratingInfra !== undefined) setCell(14, data.ratingInfra + '/5');
-    if (data.ratingMgmt !== undefined) setCell(15, data.ratingMgmt + '/5');
-    if (data.ratingEngagement !== undefined) setCell(16, data.ratingEngagement + '/5');
-    if (data.schoolRemark || data.ratingRemark) setCell(17, data.schoolRemark || data.ratingRemark);
+    if (data.spoc1Name) setCell(9, data.spoc1Name);
+    if (data.spoc1Contact) setCell(10, data.spoc1Contact);
+    if (data.spoc2Name) setCell(11, data.spoc2Name);
+    if (data.spoc2Contact) setCell(12, data.spoc2Contact);
+    if (data.totalTeachers !== undefined) setCell(13, data.totalTeachers);
+    if (totStudentsVal !== undefined) setCell(14, totStudentsVal);
+    if (data.totalWorkingComputers !== undefined) setCell(15, data.totalWorkingComputers);
+    if (data.internetFacility) setCell(16, data.internetFacility);
+    if (data.smartClass) setCell(17, data.smartClass);
+    if (data.ratingInfra !== undefined) setCell(18, data.ratingInfra + '/5');
+    if (data.ratingMgmt !== undefined) setCell(19, data.ratingMgmt + '/5');
+    if (data.ratingEngagement !== undefined) setCell(20, data.ratingEngagement + '/5');
+    if (data.schoolRemark || data.ratingRemark) setCell(21, data.schoolRemark || data.ratingRemark);
   }
 }
 
@@ -607,7 +617,7 @@ function handleGetSchoolReportData(schoolName, udiseCode) {
       return respondJSON({ status: 'no_data', message: 'No school report data present' });
     }
 
-    var values = sheet.getRange(2, 1, lastRow - 1, 17).getDisplayValues();
+    var values = sheet.getRange(2, 1, lastRow - 1, 21).getDisplayValues();
     var targetRowIdx = -1;
     var schoolNameClean = String(schoolName || "").trim().toLowerCase();
     var udiseClean = String(udiseCode || "").trim();
@@ -636,15 +646,19 @@ function handleGetSchoolReportData(schoolName, udiseCode) {
       udiseCode: rowValues[5],
       principalName: rowValues[6],
       principalContact: rowValues[7],
-      totalTeachers: rowValues[8] ? parseInt(rowValues[8], 10) : 0,
-      totalStudents: rowValues[9] ? parseInt(rowValues[9], 10) : 0,
-      totalWorkingComputers: rowValues[10] ? parseInt(rowValues[10], 10) : 0,
-      internetFacility: rowValues[11],
-      smartClass: rowValues[12],
-      ratingInfra: extractRatingNum(rowValues[13]),
-      ratingMgmt: extractRatingNum(rowValues[14]),
-      ratingEngagement: extractRatingNum(rowValues[15]),
-      schoolRemark: rowValues[16]
+      spoc1Name: rowValues[8],
+      spoc1Contact: rowValues[9],
+      spoc2Name: rowValues[10],
+      spoc2Contact: rowValues[11],
+      totalTeachers: rowValues[12] ? parseInt(rowValues[12], 10) : 0,
+      totalStudents: rowValues[13] ? parseInt(rowValues[13], 10) : 0,
+      totalWorkingComputers: rowValues[14] ? parseInt(rowValues[14], 10) : 0,
+      internetFacility: rowValues[15],
+      smartClass: rowValues[16],
+      ratingInfra: extractRatingNum(rowValues[17]),
+      ratingMgmt: extractRatingNum(rowValues[18]),
+      ratingEngagement: extractRatingNum(rowValues[19]),
+      schoolRemark: rowValues[20]
     };
 
     return respondJSON({ status: 'success', data: data });

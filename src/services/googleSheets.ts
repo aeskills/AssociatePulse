@@ -4,7 +4,7 @@ export interface ActivityPayload {
   district?: string;
   activityType: string;
   details?: string;
-  
+
   // Date & Attendance fields
   dateStr?: string; // DD/MM/YYYY
   isNewVisit?: boolean;
@@ -24,6 +24,10 @@ export interface ActivityPayload {
   visitStartTime?: string;
   principalName?: string;
   principalContact?: string;
+  spoc1Name?: string;
+  spoc1Contact?: string;
+  spoc2Name?: string;
+  spoc2Contact?: string;
   totalTeachers?: number;
   totalStudents?: number;
   totalStudentsTrained?: number;
@@ -55,7 +59,7 @@ export interface ActivityPayload {
 export async function logActivity(activity: ActivityPayload): Promise<void> {
   const webhookUrl =
     import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL ||
-    'https://script.google.com/macros/s/AKfycbwjpjOXRevOKuTx9c1rnaWKvIrf7xCJrGggYVIEBq27A_xzA-4Ha4LGjdig5snSbYou/exec';
+    'https://script.google.com/macros/s/AKfycbw1wwOJEz_P2Xs_Xkq1Hlm7nPhqtmokmVYCX2dhkGsMOzg6mRpJaby2H4sufFklvW4n/exec';
 
   if (!webhookUrl) {
     console.warn('Google Sheets Webhook URL not configured. Activity logged locally only:', activity);
@@ -83,7 +87,7 @@ export async function logActivity(activity: ActivityPayload): Promise<void> {
     // 2. Dual Fallback GET for non-photo requests to guarantee sync without CORS issues
     if (!activity.photoBase64 || activity.photoBase64.length < 2000) {
       const getUrl = `${webhookUrl}?payload=${encodeURIComponent(jsonString)}`;
-      fetch(getUrl, { mode: 'no-cors' }).catch(() => {});
+      fetch(getUrl, { mode: 'no-cors' }).catch(() => { });
     }
 
     console.log('Synced activity to Google Sheets & Drive:', activity.activityType);
@@ -110,7 +114,7 @@ export async function deleteTrainerSheet(trainerName: string, state: string = 'U
 export async function fetchLiveTrainerData(trainerName: string, state: string, dateStr?: string) {
   const webhookUrl =
     import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL ||
-    'https://script.google.com/macros/s/AKfycbwjpjOXRevOKuTx9c1rnaWKvIrf7xCJrGggYVIEBq27A_xzA-4Ha4LGjdig5snSbYou/exec';
+    'https://script.google.com/macros/s/AKfycbw1wwOJEz_P2Xs_Xkq1Hlm7nPhqtmokmVYCX2dhkGsMOzg6mRpJaby2H4sufFklvW4n/exec';
   if (!webhookUrl) return null;
 
   try {
@@ -137,7 +141,7 @@ export async function fetchLiveTrainerData(trainerName: string, state: string, d
 export async function fetchLiveSchoolReport(schoolName: string, udiseCode?: string) {
   const webhookUrl =
     import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL ||
-    'https://script.google.com/macros/s/AKfycbwjpjOXRevOKuTx9c1rnaWKvIrf7xCJrGggYVIEBq27A_xzA-4Ha4LGjdig5snSbYou/exec';
+    'https://script.google.com/macros/s/AKfycbw1wwOJEz_P2Xs_Xkq1Hlm7nPhqtmokmVYCX2dhkGsMOzg6mRpJaby2H4sufFklvW4n/exec';
   if (!webhookUrl) return null;
 
   try {
