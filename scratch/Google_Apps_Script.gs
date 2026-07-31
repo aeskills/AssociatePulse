@@ -474,12 +474,10 @@ function updateAllSchoolReportSheet(ss, trainerName, stateName, data) {
   }
 
   function setCell(colIdx, val) {
-    if (val !== undefined && val !== null && String(val).trim() !== "") {
-      master.getRange(targetRow, colIdx).setValue(val);
+    if (val !== undefined && val !== null) {
+      master.getRange(targetRow, colIdx).setValue(String(val).trim());
     }
   }
-
-  var totStudentsVal = data.totalStudents !== undefined ? data.totalStudents : data.totalStudentsTrained;
 
   if (targetRow === -1) {
     // New School: Append 1 Row (21 Columns)
@@ -494,11 +492,11 @@ function updateAllSchoolReportSheet(ss, trainerName, stateName, data) {
       data.principalContact || '',
       data.spoc1Name || '',
       data.spoc1Contact || '',
-      data.spoc2Name || '',
-      data.spoc2Contact || '',
-      data.totalTeachers !== undefined ? data.totalTeachers : '',
-      totStudentsVal !== undefined ? totStudentsVal : '',
-      data.totalWorkingComputers !== undefined ? data.totalWorkingComputers : '',
+      data.spoc2Name || '', // Kept empty if trainer did not fill SPOC 2 Name
+      data.spoc2Contact || '', // Kept empty if trainer did not fill SPOC 2 Contact
+      data.totalTeachers !== undefined && data.totalTeachers !== null ? data.totalTeachers : '',
+      data.totalStudents !== undefined && data.totalStudents !== null ? data.totalStudents : '', // School Strength only
+      data.totalWorkingComputers !== undefined && data.totalWorkingComputers !== null ? data.totalWorkingComputers : '',
       data.internetFacility || '',
       data.smartClass || '',
       data.ratingInfra ? data.ratingInfra + '/5' : '',
@@ -516,12 +514,15 @@ function updateAllSchoolReportSheet(ss, trainerName, stateName, data) {
     if (data.udiseCode) setCell(6, data.udiseCode);
     if (data.principalName) setCell(7, data.principalName);
     if (data.principalContact) setCell(8, data.principalContact);
-    if (data.spoc1Name) setCell(9, data.spoc1Name);
-    if (data.spoc1Contact) setCell(10, data.spoc1Contact);
-    if (data.spoc2Name) setCell(11, data.spoc2Name);
-    if (data.spoc2Contact) setCell(12, data.spoc2Contact);
+
+    // Write SPOC 1 & SPOC 2 (clearing SPOC 2 if empty)
+    setCell(9, data.spoc1Name || '');
+    setCell(10, data.spoc1Contact || '');
+    setCell(11, data.spoc2Name || '');
+    setCell(12, data.spoc2Contact || '');
+
     if (data.totalTeachers !== undefined) setCell(13, data.totalTeachers);
-    if (totStudentsVal !== undefined) setCell(14, totStudentsVal);
+    if (data.totalStudents !== undefined) setCell(14, data.totalStudents); // School Strength only
     if (data.totalWorkingComputers !== undefined) setCell(15, data.totalWorkingComputers);
     if (data.internetFacility) setCell(16, data.internetFacility);
     if (data.smartClass) setCell(17, data.smartClass);

@@ -349,7 +349,6 @@ export default function DailyLogTab() {
           schoolName: activeSchool?.name || (schools.length > 0 ? schools[0].name : ''),
           activityType: 'Students Trained Update',
           dateStr: todayFormatted,
-          totalStudents: num,
           totalStudentsTrained: num,
           details: `Updated Total Students Trained Today to ${num}`
         });
@@ -392,7 +391,6 @@ export default function DailyLogTab() {
         clockInLocation: locAddress,
         schoolName: selectedSch?.name || (schools.length > 0 ? schools[0].name : 'Assigned School'),
         udiseCode: selectedSch?.udiseCode || '',
-        totalStudents: numStudents,
         totalStudentsTrained: numStudents,
         photoBase64: photoBase64 || photoPreview,
         photoName: 'Present',
@@ -454,7 +452,6 @@ export default function DailyLogTab() {
       activityType: 'Clock Out',
       dateStr: todayFormatted,
       checkOut: nowTime,
-      totalStudents: numStudents,
       totalStudentsTrained: numStudents,
       workingHours: hoursStr,
       clockOutLocation: locAddress,
@@ -579,7 +576,6 @@ export default function DailyLogTab() {
       dateStr: todayFormatted,
       mood: 'Satisfied',
       overallExperience: 'Good',
-      totalStudents: numStudents,
       totalStudentsTrained: numStudents,
       highlight: highlight.trim(),
       challenges: lowlight.trim(),
