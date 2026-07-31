@@ -216,9 +216,11 @@ function ensureTrainerDriveFolders(trainerName, stateAbbrev, dateStr, status, sc
     var trainerFolder = getOrCreateFolder(rootFolder, trainerFolderName);
 
     var dateFolder = null;
-    if (status !== 'on_leave' && schoolName && String(schoolName).trim().length > 0) {
+    if (status !== 'on_leave') {
       var formattedDateFolder = dateStr.replace(/\//g, "-");
-      var cleanSchool = String(schoolName).trim().replace(/[\/\\:\*\?"<>\|]/g, "");
+      var cleanSchool = (schoolName && String(schoolName).trim().length > 0)
+        ? String(schoolName).trim().replace(/[\/\\:\*\?"<>\|]/g, "")
+        : "Visit";
       var visitFolderName = formattedDateFolder + "_" + cleanSchool;
       dateFolder = getOrCreateFolder(trainerFolder, visitFolderName);
     }
@@ -251,12 +253,16 @@ function savePhotoBlobToDrive(dateFolder, base64Data, photoFileName) {
     var blob = Utilities.newBlob(decoded, contentType, fileName);
 
     var file = dateFolder.createFile(blob);
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch (shareErr) {
+      Logger.log("Sharing restriction: " + shareErr.toString());
+    }
 
     return file.getUrl();
   } catch (err) {
     Logger.log("Failed to save image file: " + err.toString());
-    return "";
+    return dateFolder ? dateFolder.getUrl() : "";
   }
 }
 
@@ -287,32 +293,33 @@ function getOrCreateTrainerMatrixSheet(ss, trainerName, stateAbbrev, data) {
 
     // Row 8 Header
     sheet.getRange("A8").setValue("Date").setFontWeight("bold").setBackground("#dc2626").setFontColor("#ffffff");
-
-    // Row 9-25 Fixed Metric Labels in Column A
-    var metricLabels = [
-      ["Attendance Status"],                   // Row 9
-      ["Leave Reason"],                        // Row 10
-      ["Clock In Time"],                       // Row 11
-      ["Clock Out Time"],                      // Row 12
-      ["Working Hours"],                       // Row 13
-      ["Clock In Live GPS Location"],          // Row 14
-      ["Clock Out Live GPS Location"],         // Row 15
-      ["Attendance Geotag Image (Drive Link)"],// Row 16
-      ["School Visited Name"],                 // Row 17
-      ["School UDISE Code"],                   // Row 18
-      ["School Visit Start Time"],             // Row 19
-      ["Total Student Trained"],               // Row 20
-      ["EOD Highlight"],                       // Row 21
-      ["EOD Challenges"],                      // Row 22
-      ["EOD Has Complaint"],                   // Row 23
-      ["EOD Complaint Details"],               // Row 24
-      ["EOD Suggestions"]                      // Row 25
-    ];
-
-    sheet.getRange(9, 1, metricLabels.length, 1).setValues(metricLabels).setFontWeight("bold").setBackground("#f8fafc");
-    sheet.setColumnWidth(1, 260);
-    sheet.setFrozenColumns(1);
   }
+
+  // Always enforce Metric Labels in Column A to ensure Row 20 is "Total Student Trained" & layout is up to date
+  var metricLabels = [
+    ["Attendance Status"],                   // Row 9
+    ["Leave Reason"],                        // Row 10
+    ["Clock In Time"],                       // Row 11
+    ["Clock Out Time"],                      // Row 12
+    ["Working Hours"],                       // Row 13
+    ["Clock In Live GPS Location"],          // Row 14
+    ["Clock Out Live GPS Location"],         // Row 15
+    ["Attendance Geotag Image (Drive Link)"],// Row 16
+    ["School Visited Name"],                 // Row 17
+    ["School UDISE Code"],                   // Row 18
+    ["School Visit Start Time"],             // Row 19
+    ["Total Student Trained"],               // Row 20
+    ["EOD Highlight"],                       // Row 21
+    ["EOD Challenges"],                      // Row 22
+    ["EOD Has Complaint"],                   // Row 23
+    ["EOD Complaint Details"],               // Row 24
+    ["EOD Suggestions"]                      // Row 25
+  ];
+
+  sheet.getRange(9, 1, metricLabels.length, 1).setValues(metricLabels).setFontWeight("bold").setBackground("#f8fafc");
+  sheet.getRange("A26").clearContent();
+  sheet.setColumnWidth(1, 260);
+  sheet.setFrozenColumns(1);
 
   return sheet;
 }
