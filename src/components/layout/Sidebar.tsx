@@ -38,12 +38,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             location.pathname.includes('/attendance') ||
             location.pathname.includes('/visits') ||
             location.pathname.includes('/feedback')
-        },
-        {
-          label: 'School Report',
-          path: `${basePath}/schools`,
-          icon: ClipboardCheck,
-          active: location.pathname.includes('/schools')
         }
       ]
     }

@@ -8,7 +8,6 @@ export default function WorkspaceTabs() {
 
   const tabs = [
     { id: 'daily-log', label: 'Daily Field Log', path: 'daily-log', icon: CalendarRange },
-    { id: 'schools', label: 'School Report', path: 'schools', icon: ClipboardList },
     { id: 'calendar', label: 'Schedule Monthly Calendar', path: 'calendar', icon: Calendar }
   ];
 

@@ -69,7 +69,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'schools',
-            element: <SchoolDetailsTab />
+            element: <Navigate to="../daily-log" replace />
           },
           {
             path: 'calendar',
