@@ -53,7 +53,10 @@ function handleGetTrainerData(trainerName, stateName, requestedDate) {
       return respondJSON({ status: 'no_data', message: 'No date columns present' });
     }
 
-    var row8Values = sheet.getRange(8, 1, 1, lastCol).getValues()[0];
+    // Single Batch Read for All Rows & Columns
+    var fullGrid = sheet.getRange(8, 1, 18, lastCol).getDisplayValues();
+    var row8Values = fullGrid[0];
+
     var matchedCols = [];
     for (var c = 1; c < row8Values.length; c++) {
       var headerVal = String(row8Values[c] || "").trim();
@@ -69,26 +72,27 @@ function handleGetTrainerData(trainerName, stateName, requestedDate) {
     var allVisits = [];
     for (var v = 0; v < matchedCols.length; v++) {
       var targetCol = matchedCols[v];
-      var colValues = sheet.getRange(9, targetCol, 20, 1).getDisplayValues();
+      var cIdx = targetCol - 1;
+
       var visitRecord = {
         visitNum: v + 1,
         columnIdx: targetCol,
-        headerLabel: String(row8Values[targetCol - 1] || ''),
-        status: colValues[0][0] ? String(colValues[0][0]) : '',
-        leaveReason: colValues[1][0] ? String(colValues[1][0]) : '',
-        checkIn: cleanTimeStr(colValues[2][0]),
-        checkOut: cleanTimeStr(colValues[3][0]),
-        workingHours: colValues[4][0] ? String(colValues[4][0]) : '',
-        clockInLocation: colValues[5][0] ? String(colValues[5][0]) : '',
-        clockOutLocation: colValues[6][0] ? String(colValues[6][0]) : '',
-        driveLink: colValues[7][0] ? String(colValues[7][0]) : '',
-        schoolName: colValues[8][0] ? String(colValues[8][0]) : '',
-        udiseCode: colValues[9][0] ? String(colValues[9][0]) : '',
-        visitStartTime: colValues[10][0] ? String(colValues[10][0]) : '',
+        headerLabel: String(row8Values[cIdx] || ''),
+        status: fullGrid[1][cIdx] ? String(fullGrid[1][cIdx]) : '',
+        leaveReason: fullGrid[2][cIdx] ? String(fullGrid[2][cIdx]) : '',
+        checkIn: cleanTimeStr(fullGrid[3][cIdx]),
+        checkOut: cleanTimeStr(fullGrid[4][cIdx]),
+        workingHours: fullGrid[5][cIdx] ? String(fullGrid[5][cIdx]) : '',
+        clockInLocation: fullGrid[6][cIdx] ? String(fullGrid[6][cIdx]) : '',
+        clockOutLocation: fullGrid[7][cIdx] ? String(fullGrid[7][cIdx]) : '',
+        driveLink: fullGrid[8][cIdx] ? String(fullGrid[8][cIdx]) : '',
+        schoolName: fullGrid[9][cIdx] ? String(fullGrid[9][cIdx]) : '',
+        udiseCode: fullGrid[10][cIdx] ? String(fullGrid[10][cIdx]) : '',
+        visitStartTime: fullGrid[11][cIdx] ? String(fullGrid[11][cIdx]) : '',
         principalName: '',
         principalContact: '',
         totalTeachers: '',
-        totalStudentsTrained: colValues[11][0] ? String(colValues[11][0]) : '',
+        totalStudentsTrained: fullGrid[12][cIdx] ? String(fullGrid[12][cIdx]) : '',
         totalWorkingComputers: '',
         internetFacility: '',
         smartClass: '',
@@ -98,11 +102,11 @@ function handleGetTrainerData(trainerName, stateName, requestedDate) {
         ratingEngagement: '',
         ratingRemark: '',
         mood: '',
-        highlight: colValues[12][0] ? String(colValues[12][0]) : '',
-        challenges: colValues[13][0] ? String(colValues[13][0]) : '',
-        hasComplaint: colValues[14][0] ? String(colValues[14][0]) : '',
-        complaintDetails: colValues[15][0] ? String(colValues[15][0]) : '',
-        suggestions: colValues[16][0] ? String(colValues[16][0]) : ''
+        highlight: fullGrid[13][cIdx] ? String(fullGrid[13][cIdx]) : '',
+        challenges: fullGrid[14][cIdx] ? String(fullGrid[14][cIdx]) : '',
+        hasComplaint: fullGrid[15][cIdx] ? String(fullGrid[15][cIdx]) : '',
+        complaintDetails: fullGrid[16][cIdx] ? String(fullGrid[16][cIdx]) : '',
+        suggestions: fullGrid[17][cIdx] ? String(fullGrid[17][cIdx]) : ''
       };
       allVisits.push(visitRecord);
     }

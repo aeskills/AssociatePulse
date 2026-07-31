@@ -117,9 +117,13 @@ export async function fetchLiveTrainerData(trainerName: string, state: string, d
     'https://script.google.com/macros/s/AKfycbwMygpDbw0DHEfED_GgKA6QH47-DH_VzopCbK1ZKqruAlqwUWcHymZTCD3AGtUW4FJz/exec';
   if (!webhookUrl) return null;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 4000);
+
   try {
     const url = `${webhookUrl}?action=get_trainer_data&trainerName=${encodeURIComponent(trainerName)}&state=${encodeURIComponent(state)}${dateStr ? `&dateStr=${encodeURIComponent(dateStr)}` : ''}`;
-    const res = await fetch(url);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
     if (res.ok) {
       const json = await res.json();
       if (json.status === 'success' && json.data) {
@@ -133,6 +137,7 @@ export async function fetchLiveTrainerData(trainerName: string, state: string, d
       }
     }
   } catch (e) {
+    clearTimeout(timeoutId);
     console.warn('Failed to fetch live data from Google Sheets:', e);
   }
   return null;
@@ -144,9 +149,13 @@ export async function fetchLiveSchoolReport(schoolName: string, udiseCode?: stri
     'https://script.google.com/macros/s/AKfycbwMygpDbw0DHEfED_GgKA6QH47-DH_VzopCbK1ZKqruAlqwUWcHymZTCD3AGtUW4FJz/exec';
   if (!webhookUrl) return null;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 4000);
+
   try {
     const url = `${webhookUrl}?action=get_school_report_data&schoolName=${encodeURIComponent(schoolName)}&udiseCode=${encodeURIComponent(udiseCode || '')}`;
-    const res = await fetch(url);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
     if (res.ok) {
       const json = await res.json();
       if (json.status === 'success' && json.data) {
@@ -154,6 +163,7 @@ export async function fetchLiveSchoolReport(schoolName: string, udiseCode?: stri
       }
     }
   } catch (e) {
+    clearTimeout(timeoutId);
     console.warn('Failed to fetch school report data:', e);
   }
   return null;
