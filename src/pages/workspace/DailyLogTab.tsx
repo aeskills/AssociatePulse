@@ -194,7 +194,7 @@ export default function DailyLogTab() {
             const isOnLeave = liveData.status.toLowerCase().includes('leave');
 
             if (isPresent || isOnLeave) {
-              const numStudents = liveData.totalStudents ? parseInt(String(liveData.totalStudents), 10) : undefined;
+              const numStudents = liveData.totalStudentsTrained ? parseInt(String(liveData.totalStudentsTrained), 10) : undefined;
 
               useAppStore.setState((state) => {
                 const exists = state.attendance.find(r => r.trainerId === trainer.id && r.date === getToday());
@@ -241,8 +241,8 @@ export default function DailyLogTab() {
           }
 
           // --- 2. SYNC TOTAL STUDENTS TRAINED ---
-          if (liveData.totalStudents !== undefined && liveData.totalStudents !== '') {
-            setStudentsTrained(String(liveData.totalStudents));
+          if (liveData.totalStudentsTrained !== undefined && liveData.totalStudentsTrained !== '') {
+            setStudentsTrained(String(liveData.totalStudentsTrained));
           }
 
           // --- 3. SYNC SCHOOL SELECTION ---

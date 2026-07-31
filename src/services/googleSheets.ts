@@ -59,7 +59,7 @@ export interface ActivityPayload {
 export async function logActivity(activity: ActivityPayload): Promise<void> {
   const webhookUrl =
     import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL ||
-    'https://script.google.com/macros/s/AKfycbw1wwOJEz_P2Xs_Xkq1Hlm7nPhqtmokmVYCX2dhkGsMOzg6mRpJaby2H4sufFklvW4n/exec';
+    'https://script.google.com/macros/s/AKfycbwMygpDbw0DHEfED_GgKA6QH47-DH_VzopCbK1ZKqruAlqwUWcHymZTCD3AGtUW4FJz/exec';
 
   if (!webhookUrl) {
     console.warn('Google Sheets Webhook URL not configured. Activity logged locally only:', activity);
@@ -114,7 +114,7 @@ export async function deleteTrainerSheet(trainerName: string, state: string = 'U
 export async function fetchLiveTrainerData(trainerName: string, state: string, dateStr?: string) {
   const webhookUrl =
     import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL ||
-    'https://script.google.com/macros/s/AKfycbw1wwOJEz_P2Xs_Xkq1Hlm7nPhqtmokmVYCX2dhkGsMOzg6mRpJaby2H4sufFklvW4n/exec';
+    'https://script.google.com/macros/s/AKfycbwMygpDbw0DHEfED_GgKA6QH47-DH_VzopCbK1ZKqruAlqwUWcHymZTCD3AGtUW4FJz/exec';
   if (!webhookUrl) return null;
 
   try {
@@ -141,7 +141,7 @@ export async function fetchLiveTrainerData(trainerName: string, state: string, d
 export async function fetchLiveSchoolReport(schoolName: string, udiseCode?: string) {
   const webhookUrl =
     import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL ||
-    'https://script.google.com/macros/s/AKfycbw1wwOJEz_P2Xs_Xkq1Hlm7nPhqtmokmVYCX2dhkGsMOzg6mRpJaby2H4sufFklvW4n/exec';
+    'https://script.google.com/macros/s/AKfycbwMygpDbw0DHEfED_GgKA6QH47-DH_VzopCbK1ZKqruAlqwUWcHymZTCD3AGtUW4FJz/exec';
   if (!webhookUrl) return null;
 
   try {

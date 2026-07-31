@@ -6,6 +6,7 @@
  */
 
 var DRIVE_ROOT_FOLDER_ID = "1VtOVTezCoVOFd9AqoYTqcRdSx5k0oHQU";
+var SCRIPT_VERSION = "8.0_AUTO_REPAIR_SPOC";
 
 function testManualRun() {
   Logger.log("AssociatePulse ERP Webhook Engine Ready & Active.");
@@ -18,6 +19,9 @@ function doPost(e) {
 
 function doGet(e) {
   if (e && e.parameter) {
+    if (e.parameter.action === 'check_version') {
+      return respondJSON({ status: 'success', version: SCRIPT_VERSION });
+    }
     if (e.parameter.action === 'get_trainer_data') {
       return handleGetTrainerData(e.parameter.trainerName, e.parameter.state, e.parameter.dateStr);
     }
@@ -84,7 +88,7 @@ function handleGetTrainerData(trainerName, stateName, requestedDate) {
         principalName: '',
         principalContact: '',
         totalTeachers: '',
-        totalStudents: colValues[11][0] ? String(colValues[11][0]) : '',
+        totalStudentsTrained: colValues[11][0] ? String(colValues[11][0]) : '',
         totalWorkingComputers: '',
         internetFacility: '',
         smartClass: '',
@@ -175,7 +179,11 @@ function processRequest(jsonString) {
     var row16DriveLink = drivePhotoUrl || driveFolderUrl;
 
     // 4. WRITE DATA INTO THE DATE COLUMN
-    writeToDateColumn(trainerSheet, data, row16DriveLink);
+    // For School Details / School Rating, skip writing to date column (trainer self tab)
+    // since these are school-level metadata and NOT daily field log entries.
+    if (activityType !== 'School Details' && activityType !== 'School Rating') {
+      writeToDateColumn(trainerSheet, data, row16DriveLink);
+    }
 
     // 5. UPDATE MASTER "ALL SCHOOL REPORT" TAB ONLY WHEN SCHOOL INSPECTION REPORT IS SUBMITTED
     var isSchoolReportData = (activityType === 'School Details' || activityType === 'School Rating') ||
@@ -427,8 +435,10 @@ function writeToDateColumn(sheet, data, driveLink) {
   if (data.udiseCode) setVal(18, data.udiseCode);
   if (data.visitStartTime) setVal(19, data.visitStartTime);
 
-  var totalTrained = data.totalStudentsTrained || data.totalStudents;
-  if (totalTrained !== undefined && totalTrained !== null && String(totalTrained).trim() !== "") setVal(20, totalTrained);
+  // Row 20 = Total Student Trained TODAY (daily count). NEVER use totalStudents (school strength).
+  if (data.totalStudentsTrained !== undefined && data.totalStudentsTrained !== null && String(data.totalStudentsTrained).trim() !== "") {
+    setVal(20, data.totalStudentsTrained);
+  }
 
   if (data.highlight) setVal(21, data.highlight);
   if (data.challenges) setVal(22, data.challenges);
@@ -448,10 +458,21 @@ function updateAllSchoolReportSheet(ss, trainerName, stateName, data) {
   var master = ss.getSheetByName("All School Report");
   if (!master) {
     master = ss.insertSheet("All School Report", 0);
-    var headers = [
-      ["Date", "State", "District", "Trainer Name", "School Name", "UDISE Code", "Principal Name", "Principal Contact", "SPOC 1 Name", "SPOC 1 Contact", "SPOC 2 Name", "SPOC 2 Contact", "Total Teachers", "Total Students", "Working PCs", "Internet", "Smart Class", "Infra Rating", "Mgmt Rating", "Engagement Rating", "Remarks"]
-    ];
-    master.getRange(1, 1, 1, 21).setValues(headers).setBackground("#0f172a").setFontColor("#ffffff").setFontWeight("bold");
+  }
+
+  // ALWAYS enforce 21-column headers and auto-clean old 17-column sheets
+  var correctHeaders = [
+    ["Date", "State", "District", "Trainer Name", "School Name", "UDISE Code", "Principal Name", "Principal Contact", "SPOC 1 Name", "SPOC 1 Contact", "SPOC 2 Name", "SPOC 2 Contact", "Total Teachers", "Total Students", "Working PCs", "Internet", "Smart Class", "Infra Rating", "Mgmt Rating", "Engagement Rating", "Remarks"]
+  ];
+
+  var colIHeader = master.getLastColumn() >= 9 ? String(master.getRange(1, 9).getValue() || "").trim() : "";
+  if (colIHeader !== "SPOC 1 Name") {
+    // Old 17-column layout detected! Clear old tab completely to prevent column shifting
+    master.clear();
+    master.getRange(1, 1, 1, 21).setValues(correctHeaders).setBackground("#0f172a").setFontColor("#ffffff").setFontWeight("bold");
+    master.setFrozenRows(1);
+  } else {
+    master.getRange(1, 1, 1, 21).setValues(correctHeaders).setBackground("#0f172a").setFontColor("#ffffff").setFontWeight("bold");
     master.setFrozenRows(1);
   }
 
