@@ -84,7 +84,7 @@ function handleGetTrainerData(trainerName, stateName, requestedDate) {
         principalName: '',
         principalContact: '',
         totalTeachers: '',
-        totalStudents: '',
+        totalStudents: colValues[11][0] ? String(colValues[11][0]) : '',
         totalWorkingComputers: '',
         internetFacility: '',
         smartClass: '',
@@ -94,8 +94,7 @@ function handleGetTrainerData(trainerName, stateName, requestedDate) {
         ratingEngagement: '',
         ratingRemark: '',
         mood: '',
-        highlight: colValues[11][0] ? String(colValues[11][0]) : '',
-        lowlight: colValues[12][0] ? String(colValues[12][0]) : '',
+        highlight: colValues[12][0] ? String(colValues[12][0]) : '',
         challenges: colValues[13][0] ? String(colValues[13][0]) : '',
         hasComplaint: colValues[14][0] ? String(colValues[14][0]) : '',
         complaintDetails: colValues[15][0] ? String(colValues[15][0]) : '',
@@ -302,8 +301,8 @@ function getOrCreateTrainerMatrixSheet(ss, trainerName, stateAbbrev, data) {
       ["School Visited Name"],                 // Row 17
       ["School UDISE Code"],                   // Row 18
       ["School Visit Start Time"],             // Row 19
-      ["EOD Highlight"],                       // Row 20
-      ["EOD Lowlight"],                        // Row 21
+      ["Total Student Trained"],               // Row 20
+      ["EOD Highlight"],                       // Row 21
       ["EOD Challenges"],                      // Row 22
       ["EOD Has Complaint"],                   // Row 23
       ["EOD Complaint Details"],               // Row 24
@@ -421,8 +420,10 @@ function writeToDateColumn(sheet, data, driveLink) {
   if (data.udiseCode) setVal(18, data.udiseCode);
   if (data.visitStartTime) setVal(19, data.visitStartTime);
 
-  if (data.highlight) setVal(20, data.highlight);
-  if (data.lowlight) setVal(21, data.lowlight);
+  var totalTrained = data.totalStudentsTrained || data.totalStudents;
+  if (totalTrained !== undefined && totalTrained !== null && String(totalTrained).trim() !== "") setVal(20, totalTrained);
+
+  if (data.highlight) setVal(21, data.highlight);
   if (data.challenges) setVal(22, data.challenges);
   if (data.hasComplaint !== undefined) setVal(23, data.hasComplaint ? 'Yes' : 'No');
   if (data.complaintDetails) setVal(24, data.complaintDetails);

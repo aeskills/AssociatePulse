@@ -26,6 +26,7 @@ export interface ActivityPayload {
   principalContact?: string;
   totalTeachers?: number;
   totalStudents?: number;
+  totalStudentsTrained?: number;
   totalWorkingComputers?: number;
   internetFacility?: string;
   smartClass?: string;
@@ -41,7 +42,6 @@ export interface ActivityPayload {
   overallExperience?: string;
   mood?: string;
   highlight?: string;
-  lowlight?: string;
   challenges?: string;
   hasComplaint?: boolean;
   complaintDetails?: string;

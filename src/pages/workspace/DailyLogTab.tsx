@@ -258,7 +258,7 @@ export default function DailyLogTab() {
 
           // --- 4. SYNC FEEDBACK FORM FIELDS ---
           if (liveData.highlight) setHighlight(liveData.highlight);
-          if (liveData.lowlight) setLowlight(liveData.lowlight);
+          if (liveData.challenges || liveData.lowlight) setLowlight(liveData.challenges || liveData.lowlight);
           if (liveData.suggestions) setEodFeedback(liveData.suggestions);
 
           if (liveData.hasComplaint) {
@@ -331,6 +331,32 @@ export default function DailyLogTab() {
     }
   };
 
+  // Handler to update Total Students Trained Count and sync immediately to Google Sheets
+  const handleStudentsTrainedChange = (val: string) => {
+    setStudentsTrained(val);
+    if (trainerId) {
+      const num = parseInt(val, 10);
+      if (!isNaN(num)) {
+        saveStudentsTrained(trainerId, num);
+
+        const todayFormatted = formatDate(getToday(), { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const activeSchool = schools.find((s) => s.id === selectedSchoolId);
+
+        logActivity({
+          trainerName: trainer?.name || 'Trainer',
+          state: trainer?.stateId || 'UP',
+          district: trainer?.district || '',
+          schoolName: activeSchool?.name || (schools.length > 0 ? schools[0].name : ''),
+          activityType: 'Students Trained Update',
+          dateStr: todayFormatted,
+          totalStudents: num,
+          totalStudentsTrained: num,
+          details: `Updated Total Students Trained Today to ${num}`
+        });
+      }
+    }
+  };
+
   // Submit Clock-In (Present or Leave)
   const handleAttendanceSubmit = () => {
     const selectedSch = schools.find((s) => s.id === selectedSchoolId);
@@ -351,6 +377,8 @@ export default function DailyLogTab() {
 
       markAttendance(trainerId || '', 'present', currentLocation, photoPreview);
 
+      const numStudents = studentsTrained ? parseInt(studentsTrained, 10) : (todayAtt?.studentsTrained ?? undefined);
+
       logActivity({
         trainerName: trainer?.name || 'Trainer',
         state: trainer?.stateId || 'UP',
@@ -364,6 +392,8 @@ export default function DailyLogTab() {
         clockInLocation: locAddress,
         schoolName: selectedSch?.name || (schools.length > 0 ? schools[0].name : 'Assigned School'),
         udiseCode: selectedSch?.udiseCode || '',
+        totalStudents: numStudents,
+        totalStudentsTrained: numStudents,
         photoBase64: photoBase64 || photoPreview,
         photoName: 'Present',
         details: `Clocked in at ${selectedSch?.name || 'School'}`
@@ -414,15 +444,18 @@ export default function DailyLogTab() {
     }
 
     const activeSchool = schools.find((s) => s.id === selectedSchoolId);
+    const numStudents = studentsTrained ? parseInt(studentsTrained, 10) : (todayAtt?.studentsTrained ?? undefined);
 
     logActivity({
       trainerName: trainer?.name || 'Trainer',
       state: trainer?.stateId || 'UP',
       district: trainer?.district || '',
-      schoolName: activeSchool?.name || (todayAtt?.schoolName) || (schools.length > 0 ? schools[0].name : ''),
+      schoolName: activeSchool?.name || (schools.length > 0 ? schools[0].name : ''),
       activityType: 'Clock Out',
       dateStr: todayFormatted,
       checkOut: nowTime,
+      totalStudents: numStudents,
+      totalStudentsTrained: numStudents,
       workingHours: hoursStr,
       clockOutLocation: locAddress,
       details: `Clocked Out at ${nowTime} (${hoursStr} hrs)`
@@ -451,7 +484,7 @@ export default function DailyLogTab() {
         trainerName: trainer.name,
         state: trainer.stateId,
         district: trainer.district,
-        schoolName: activeSchool?.name || (todayAtt?.schoolName) || (schools.length > 0 ? schools[0].name : ''),
+        schoolName: activeSchool?.name || (schools.length > 0 ? schools[0].name : ''),
         date: todayDate,
         file,
         onProgress: (prog) => {
@@ -536,6 +569,8 @@ export default function DailyLogTab() {
       mood: 'Satisfied'
     });
 
+    const numStudents = studentsTrained ? parseInt(studentsTrained, 10) : (todayAtt?.studentsTrained ?? undefined);
+
     logActivity({
       trainerName: trainer?.name || 'Trainer',
       state: trainer?.stateId || 'UP',
@@ -544,8 +579,9 @@ export default function DailyLogTab() {
       dateStr: todayFormatted,
       mood: 'Satisfied',
       overallExperience: 'Good',
+      totalStudents: numStudents,
+      totalStudentsTrained: numStudents,
       highlight: highlight.trim(),
-      lowlight: lowlight.trim(),
       challenges: lowlight.trim(),
       hasComplaint: hasComplaint === 'yes',
       complaintDetails: hasComplaint === 'yes' ? complaintDetails.trim() : 'N/A',
@@ -1027,16 +1063,7 @@ export default function DailyLogTab() {
               type="number"
               min="0"
               value={studentsTrained}
-              onChange={(e) => {
-                const val = e.target.value;
-                setStudentsTrained(val);
-                if (trainerId && val !== '') {
-                  const num = parseInt(val, 10);
-                  if (!isNaN(num)) {
-                    saveStudentsTrained(trainerId, num);
-                  }
-                }
-              }}
+              onChange={(e) => handleStudentsTrainedChange(e.target.value)}
               placeholder="Enter total number of students trained today (e.g. 45)..."
               className="w-full h-12 px-4 text-sm font-bold bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all shadow-sm"
             />
