@@ -49,7 +49,7 @@ export default function AdminDashboard() {
 
   // Authentication State for /admin route
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('admin_authenticated') === 'true';
+    return localStorage.getItem('admin_authenticated') === 'true' || sessionStorage.getItem('admin_authenticated') === 'true';
   });
   const [adminPassInput, setAdminPassInput] = useState('');
   const [authError, setAuthError] = useState('');

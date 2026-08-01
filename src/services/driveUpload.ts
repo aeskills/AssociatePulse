@@ -59,6 +59,7 @@ export function uploadToDrive({
           schoolName,
           activityType: 'MEDIA_UPLOAD',
           dateStr: formattedDate,
+          isNewVisit: false,
           photoBase64: base64Data,
           photoName: file.name,
           details: `Uploaded media: ${file.name}`

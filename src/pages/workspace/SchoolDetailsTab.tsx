@@ -8,7 +8,6 @@ import { Save, School as SchoolIcon, RefreshCw } from 'lucide-react';
 import useAppStore from '../../store/useAppStore';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import SchoolSelect from '../../components/workspace/SchoolSelect';
 import StarRating from '../../components/ui/StarRating';
 import EmptyState from '../../components/ui/EmptyState';
 import CustomSelect from '../../components/ui/CustomSelect';
@@ -51,15 +50,8 @@ export default function SchoolDetailsTab() {
   const saveRating = useAppStore((s) => s.saveRating);
 
   const trainer = trainers.find((t) => t.id === trainerId) || trainers[0];
-  const schools = useMemo(() => getSchoolsByTrainer(trainerId || ''), [trainerId, getSchoolsByTrainer]);
-  const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
-
-  const selectedSchool = schools.find((s) => s.id === selectedSchoolId);
-
-  // Pre-fill form from database if already inspection exists
-  const existingDetails = useMemo(() => {
-    return schoolInspectionDetails.find((d) => d.schoolId === selectedSchoolId);
-  }, [selectedSchoolId, schoolInspectionDetails]);
+  const [manualSchoolName, setManualSchoolName] = useState<string>('');
+  const [manualUdiseCode, setManualUdiseCode] = useState<string>('');
 
   const {
     register,
@@ -93,80 +85,14 @@ export default function SchoolDetailsTab() {
   const [ratingRemark, setRatingRemark] = useState('');
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
-  // UNIFIED: Reset form FIRST on school selection, then fetch live GSheet data if it matches the selected school.
-  // Dependencies: ONLY selectedSchoolId, so typing in form fields NEVER triggers a re-reset loop.
-  React.useEffect(() => {
-    if (!selectedSchoolId || !selectedSchool) return;
-
-    // STEP 1: Reset form to saved details for THIS school or blank
-    const schoolSavedDetails = useAppStore.getState().schoolInspectionDetails.find((d) => d.schoolId === selectedSchoolId);
-    reset({
-      principalName: schoolSavedDetails?.principalName || '',
-      principalContact: schoolSavedDetails?.principalContact || '',
-      spoc1Name: schoolSavedDetails?.spoc1Name || '',
-      spoc1Contact: schoolSavedDetails?.spoc1Contact || '',
-      spoc2Name: schoolSavedDetails?.spoc2Name || '',
-      spoc2Contact: schoolSavedDetails?.spoc2Contact || '',
-      totalTeachers: schoolSavedDetails?.totalTeachers || 0,
-      totalStudents: schoolSavedDetails?.totalStudents || 0,
-      totalWorkingComputers: schoolSavedDetails?.totalWorkingComputers || 0,
-      internetFacility: schoolSavedDetails?.internetFacility || '',
-      smartClass: schoolSavedDetails?.smartClass || '',
-      remark: schoolSavedDetails?.remark || ''
-    });
-
-    // Restore ratings from store for THIS school
-    const existingRatingRecord = useAppStore.getState().ratings.find(
-      (r) => r.schoolId === selectedSchoolId && r.trainerId === trainerId
-    );
-    if (existingRatingRecord) {
-      setRatings(existingRatingRecord.ratings || { infrastructure: 0, management: 0, engagement: 0 });
-      setRatingRemark(existingRatingRecord.comment || '');
-    } else {
-      setRatings({ infrastructure: 0, management: 0, engagement: 0 });
-      setRatingRemark('');
-    }
-
-    // STEP 2: Fetch live data from Google Sheets "All School Report" master sheet
-    if (selectedSchool) {
-      setIsSyncing(true);
-      fetchLiveSchoolReport(selectedSchool.name, selectedSchool.udiseCode)
-        .then((reportData) => {
-          if (!reportData) {
-            setIsSyncing(false);
-            return;
-          }
-
-          // Pre-fill form values from GSheet All School Report
-          if (reportData.principalName) setValue('principalName', reportData.principalName);
-          if (reportData.principalContact) setValue('principalContact', reportData.principalContact);
-          if (reportData.spoc1Name) setValue('spoc1Name', reportData.spoc1Name);
-          if (reportData.spoc1Contact) setValue('spoc1Contact', reportData.spoc1Contact);
-          if (reportData.spoc2Name) setValue('spoc2Name', reportData.spoc2Name);
-          if (reportData.spoc2Contact) setValue('spoc2Contact', reportData.spoc2Contact);
-          if (reportData.totalTeachers !== undefined) setValue('totalTeachers', Number(reportData.totalTeachers) || 0);
-          if (reportData.totalStudents !== undefined) setValue('totalStudents', Number(reportData.totalStudents) || 0);
-          if (reportData.totalWorkingComputers !== undefined) setValue('totalWorkingComputers', Number(reportData.totalWorkingComputers) || 0);
-          if (reportData.internetFacility) setValue('internetFacility', reportData.internetFacility);
-          if (reportData.smartClass) setValue('smartClass', reportData.smartClass);
-          if (reportData.schoolRemark) setValue('remark', reportData.schoolRemark);
-
-          setRatings({
-            infrastructure: Number(reportData.ratingInfra) || 0,
-            management: Number(reportData.ratingMgmt) || 0,
-            engagement: Number(reportData.ratingEngagement) || 0
-          });
-        })
-        .finally(() => {
-          setIsSyncing(false);
-        });
-    }
-  }, [selectedSchoolId]);
-
   const onSubmitDetails = (data: FormValues) => {
-    if (!selectedSchoolId || !selectedSchool || !trainer) return;
+    if (!manualSchoolName.trim()) {
+      useAppStore.getState().addToast('Please enter school name first', 'error');
+      return;
+    }
+    if (!trainer) return;
     saveInspectionDetails({
-      schoolId: selectedSchoolId,
+      schoolId: manualSchoolName.trim(),
       ...data
     });
 
@@ -178,8 +104,8 @@ export default function SchoolDetailsTab() {
       district: trainer.district || '',
       activityType: 'School Details',
       dateStr: todayFormatted,
-      schoolName: selectedSchool.name,
-      udiseCode: selectedSchool.udiseCode,
+      schoolName: manualSchoolName.trim(),
+      udiseCode: manualUdiseCode.trim(),
       principalName: data.principalName,
       principalContact: data.principalContact,
       spoc1Name: data.spoc1Name,
@@ -192,14 +118,18 @@ export default function SchoolDetailsTab() {
       internetFacility: data.internetFacility,
       smartClass: data.smartClass,
       schoolRemark: data.remark || '',
-      details: `Saved school info for ${selectedSchool.name}`
+      details: `Saved school info for ${manualSchoolName.trim()}`
     });
 
     useAppStore.getState().addToast('School Information saved successfully!', 'success');
   };
 
   const onSubmitRating = () => {
-    if (!selectedSchoolId || !selectedSchool || !trainerId || !trainer) return;
+    if (!manualSchoolName.trim()) {
+      useAppStore.getState().addToast('Please enter school name first', 'error');
+      return;
+    }
+    if (!trainerId || !trainer) return;
     
     const rated = Object.values(ratings).some((r) => r > 0);
     if (!rated) {
@@ -207,7 +137,7 @@ export default function SchoolDetailsTab() {
       return;
     }
 
-    saveRating(trainerId, selectedSchoolId, ratings, ratingRemark);
+    saveRating(trainerId, manualSchoolName.trim(), ratings, ratingRemark);
 
     const todayFormatted = formatDate(getToday(), { day: '2-digit', month: '2-digit', year: 'numeric' });
 
@@ -217,13 +147,13 @@ export default function SchoolDetailsTab() {
       district: trainer.district || '',
       activityType: 'School Rating',
       dateStr: todayFormatted,
-      schoolName: selectedSchool.name,
-      udiseCode: selectedSchool.udiseCode,
+      schoolName: manualSchoolName.trim(),
+      udiseCode: manualUdiseCode.trim(),
       ratingInfra: ratings.infrastructure || 0,
       ratingMgmt: ratings.management || 0,
       ratingEngagement: ratings.engagement || 0,
       ratingRemark: ratingRemark.trim(),
-      details: `Rated ${selectedSchool.name}`
+      details: `Rated ${manualSchoolName.trim()}`
     });
 
     useAppStore.getState().addToast('Ratings & Remark saved successfully!', 'success');
@@ -257,31 +187,40 @@ export default function SchoolDetailsTab() {
           </span>
         </div>
       )}
-      {/* School selector select */}
-      <Card className="relative !overflow-visible">
+      {/* School selector text input */}
+      <Card className="relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-[4px] bg-primary-600" />
         
         <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-4">School Report & Inspection Details</h2>
-        <SchoolSelect
-          schools={schools}
-          value={selectedSchoolId}
-          onChange={(val) => {
-            setSelectedSchoolId(val);
-            useAppStore.setState({ activeSchoolId: val });
-          }}
-          placeholder="Select a school to view details..."
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-black text-slate-600 uppercase tracking-wider mb-2">
+              School Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={manualSchoolName}
+              onChange={(e) => setManualSchoolName(e.target.value)}
+              placeholder="Enter school name manually..."
+              className="w-full px-4 py-2.5 text-sm rounded-xl font-semibold bg-white border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 shadow-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-black text-slate-600 uppercase tracking-wider mb-2">
+              UDISE Code (Optional)
+            </label>
+            <input
+              type="text"
+              value={manualUdiseCode}
+              onChange={(e) => setManualUdiseCode(e.target.value)}
+              placeholder="Enter 11-digit UDISE code..."
+              className="w-full px-4 py-2.5 text-sm rounded-xl font-semibold bg-white border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 shadow-sm"
+            />
+          </div>
+        </div>
       </Card>
 
-      {!selectedSchoolId ? (
-        <EmptyState
-          icon={SchoolIcon}
-          title="Select a School First"
-          description="Please select a school from the dropdown above to view, fetch live data, or fill inspection details."
-        />
-      ) : (
-        <>
-          {/* School details form — 8 Fields */}
+      {/* School details form — 8 Fields */}
           <Card className="relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-[4px] bg-primary-650" />
             
@@ -435,8 +374,6 @@ export default function SchoolDetailsTab() {
               </div>
             </div>
           </Card>
-        </>
-      )}
     </motion.div>
   );
 }

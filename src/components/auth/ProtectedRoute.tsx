@@ -12,8 +12,8 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
   const trainers = useAppStore((s) => s.trainers);
   const userRole = useAppStore((s) => s.userRole);
 
-  const isAdminAuth = sessionStorage.getItem('admin_authenticated') === 'true';
-  const trainerAuthId = sessionStorage.getItem('trainer_authenticated');
+  const isAdminAuth = localStorage.getItem('admin_authenticated') === 'true' || sessionStorage.getItem('admin_authenticated') === 'true';
+  const trainerAuthId = localStorage.getItem('trainer_authenticated') || sessionStorage.getItem('trainer_authenticated');
 
   useEffect(() => {
     // Sync store role with sessionStorage tokens on mount / route change

@@ -5,7 +5,6 @@ import { Download, FileSpreadsheet, MapPin, Play, StopCircle, CheckCircle2 } fro
 import useAppStore from '../../store/useAppStore';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import SchoolSelect from '../../components/workspace/SchoolSelect';
 import UploadZone from '../../components/workspace/UploadZone';
 import type { UploadedMedia } from '../../components/workspace/UploadZone';
 import { downloadStudentIdSheet } from '../../services/schoolData';
@@ -150,19 +149,24 @@ export default function SchoolVisitTab() {
         </p>
 
         <div className="space-y-4">
-          <SchoolSelect
-            schools={schools}
-            value={selectedSchoolId}
-            onChange={(val) => {
-              setSelectedSchoolId(val);
-            }}
-          />
+          <div>
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
+              Enter School Name
+            </label>
+            <input
+              type="text"
+              value={selectedSchoolId || ''}
+              onChange={(e) => setSelectedSchoolId(e.target.value)}
+              placeholder="Type school name manually..."
+              className="w-full h-12 px-4 text-sm font-bold bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 shadow-sm"
+            />
+          </div>
 
-          {selectedSchool && !activeVisit.timerActive && (
+          {selectedSchoolId && selectedSchoolId.trim() && !activeVisit.timerActive && (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 bg-slate-50 border border-slate-200/60 rounded-2xl">
               <div className="text-xs font-semibold text-slate-500 flex items-center gap-2">
                 <MapPin size={14} className="text-primary-500" />
-                <span>Selected: {selectedSchool.address}</span>
+                <span>Selected: {selectedSchoolId.trim()}</span>
               </div>
               <Button
                 onClick={handleStartVisit}

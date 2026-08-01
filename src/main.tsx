@@ -5,7 +5,8 @@ import App from './App';
 import LandingPage from './pages/LandingPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import TrainerWorkspace from './pages/workspace/TrainerWorkspace';
-import DailyLogTab from './pages/workspace/DailyLogTab';
+import AttendanceTab from './pages/workspace/AttendanceTab';
+import DailyFieldLogTab from './pages/workspace/DailyFieldLogTab';
 import SchoolDetailsTab from './pages/workspace/SchoolDetailsTab';
 import MonthlyCalendarTab from './pages/workspace/MonthlyCalendarTab';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -37,11 +38,11 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="state/up/trainer/t-manish/daily-log" replace />
+        element: <Navigate to="state/up/trainer/t-manish/attendance" replace />
       },
       {
         path: 'state/:stateId',
-        element: <Navigate to="trainer/t-manish/daily-log" replace />
+        element: <Navigate to="trainer/t-manish/attendance" replace />
       },
       {
         path: 'state/:stateId/trainer/:trainerId',
@@ -49,19 +50,19 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Navigate to="daily-log" replace />
-          },
-          {
-            path: 'daily-log',
-            element: <DailyLogTab />
+            element: <Navigate to="attendance" replace />
           },
           {
             path: 'attendance',
-            element: <Navigate to="../daily-log" replace />
+            element: <AttendanceTab />
+          },
+          {
+            path: 'daily-log',
+            element: <DailyFieldLogTab />
           },
           {
             path: 'visits',
-            element: <Navigate to="../daily-log" replace />
+            element: <Navigate to="../attendance" replace />
           },
           {
             path: 'feedback',

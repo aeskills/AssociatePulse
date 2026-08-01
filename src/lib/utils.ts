@@ -47,6 +47,51 @@ export function formatDate(dateStr: string, options: Intl.DateTimeFormatOptions 
 }
 
 /**
+ * Standardize time string formatting as 12-hour format (e.g. "07:24 PM")
+ */
+export function getCurrentFormattedTime(dateStrOrObj?: string | Date | null): string {
+  if (!dateStrOrObj) {
+    return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+  if (dateStrOrObj instanceof Date) {
+    if (isNaN(dateStrOrObj.getTime())) return '';
+    return dateStrOrObj.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+  const str = String(dateStrOrObj).trim();
+  if (str.includes('AM') || str.includes('PM') || str.includes('am') || str.includes('pm')) {
+    return str;
+  }
+  try {
+    const todayStr = new Date().toDateString();
+    const d = new Date(`${todayStr} ${str}`);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+  } catch (e) {}
+  return str;
+}
+
+/**
+ * Calculate working hours accurately between Check-In and Check-Out
+ */
+export function calculateWorkingHours(checkInStr?: string | null, checkOutStr?: string | null): string {
+  if (!checkInStr) return '0.0';
+  try {
+    const todayStr = new Date().toDateString();
+    const cin = new Date(`${todayStr} ${checkInStr}`);
+    const cout = checkOutStr ? new Date(`${todayStr} ${checkOutStr}`) : new Date();
+
+    if (isNaN(cin.getTime()) || isNaN(cout.getTime())) return '0.0';
+    
+    const diffMs = Math.max(0, cout.getTime() - cin.getTime());
+    const hours = (diffMs / (1000 * 60 * 60)).toFixed(1);
+    return hours;
+  } catch (e) {
+    return '0.0';
+  }
+}
+
+/**
  * Deterministic background gradient for trainer cards
  */
 export function getDeterministicGradient(seed: string): string {
@@ -65,6 +110,45 @@ export function getDeterministicGradient(seed: string): string {
   const index = Math.abs(hash) % gradients.length;
   return gradients[index];
 }
+
+/**
+ * Compress and resize an image file to a lightweight JPEG base64 string
+ */
+export function compressImageToBase64(file: File, maxWidth = 1024): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedB64 = canvas.toDataURL('image/jpeg', 0.8);
+          resolve(compressedB64);
+        } else {
+          resolve(event.target?.result as string);
+        }
+      };
+      img.onerror = reject;
+      img.src = event.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 
 /**
  * Deterministic text/border colors for state badges

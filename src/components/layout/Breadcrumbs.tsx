@@ -15,13 +15,12 @@ export default function Breadcrumbs() {
 
   const getTabLabel = (part: string) => {
     switch (part) {
-      case 'daily-log':
       case 'attendance':
-      case 'visits':
-      case 'feedback':
+        return 'Attendance';
+      case 'daily-log':
         return 'Daily Field Log';
-      case 'schools':
-        return 'School Report';
+      case 'calendar':
+        return 'Schedule Monthly Calendar';
       default:
         return part;
     }

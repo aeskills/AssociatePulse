@@ -74,7 +74,7 @@ export async function logActivity(activity: ActivityPayload): Promise<void> {
 
     const jsonString = JSON.stringify(payload);
 
-    // 1. Try POST with text/plain
+    // Send single POST request to Google Apps Script Webhook
     await fetch(webhookUrl, {
       method: 'POST',
       mode: 'no-cors',
@@ -83,12 +83,6 @@ export async function logActivity(activity: ActivityPayload): Promise<void> {
       },
       body: jsonString
     });
-
-    // 2. Dual Fallback GET for non-photo requests to guarantee sync without CORS issues
-    if (!activity.photoBase64 || activity.photoBase64.length < 2000) {
-      const getUrl = `${webhookUrl}?payload=${encodeURIComponent(jsonString)}`;
-      fetch(getUrl, { mode: 'no-cors' }).catch(() => { });
-    }
 
     console.log('Synced activity to Google Sheets & Drive:', activity.activityType);
   } catch (error) {

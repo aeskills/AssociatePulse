@@ -1,5 +1,5 @@
 import { NavLink, useParams } from 'react-router-dom';
-import { CalendarRange, ClipboardList, Calendar } from 'lucide-react';
+import { Clock, CalendarRange, Calendar } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export default function WorkspaceTabs() {
@@ -7,6 +7,7 @@ export default function WorkspaceTabs() {
   const basePath = `/dashboard/state/${stateId}/trainer/${trainerId}`;
 
   const tabs = [
+    { id: 'attendance', label: 'Attendance', path: 'attendance', icon: Clock },
     { id: 'daily-log', label: 'Daily Field Log', path: 'daily-log', icon: CalendarRange },
     { id: 'calendar', label: 'Schedule Monthly Calendar', path: 'calendar', icon: Calendar }
   ];

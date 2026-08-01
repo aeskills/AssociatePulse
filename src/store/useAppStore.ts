@@ -5,7 +5,7 @@ import trainersData from '../data/trainers.json';
 import schoolsData from '../data/schools.json';
 import attendanceData from '../data/attendance.json';
 import feedbackData from '../data/feedback.json';
-import { getToday } from '../lib/utils';
+import { getToday, getCurrentFormattedTime, calculateWorkingHours } from '../lib/utils';
 import { logActivity } from '../services/googleSheets';
 import { getLiveLocation, type LocationResult } from '../utils/geolocation';
 
@@ -54,6 +54,7 @@ export interface AttendanceRecord {
   checkOut: string | null;
   workingHours: string;
   status: 'present' | 'absent' | 'on_leave';
+  schoolName?: string;
   geoTag: { lat: number; lng: number; address?: string } | null;
   clockInLocation?: { lat: number; lng: number; address?: string } | null;
   clockOutLocation?: { lat: number; lng: number; address?: string } | null;
@@ -159,6 +160,17 @@ export interface AppState {
     locationCaptured: { lat: number; lng: number } | null;
   };
 
+  // Multi-visit tracking (persisted)
+  currentVisitNumber: number;
+  todayCompletedVisits: Array<{
+    visitNum: number;
+    schoolName: string;
+    checkIn: string;
+    checkOut: string;
+    workingHours: string;
+  }>;
+  visitDate: string | null; // YYYY-MM-DD to reset visits on new day
+
   // Actions
   login: (role: 'admin' | 'trainer', trainerId?: string | null) => void;
   logout: () => void;
@@ -176,7 +188,8 @@ export interface AppState {
     status: 'present' | 'absent' | 'on_leave',
     geoTag?: { lat: number; lng: number; address?: string } | null,
     photoUrl?: string,
-    leaveReason?: string
+    leaveReason?: string,
+    schoolName?: string
   ) => void;
   checkOut: (trainerId: string, geoTag?: { lat: number; lng: number; address?: string } | null) => void;
   autoCheckOutYesterday: (trainerId: string) => boolean;
@@ -260,8 +273,14 @@ export const useAppStore = create<AppState>()(
     locationCaptured: null
   },
 
+  currentVisitNumber: 1,
+  todayCompletedVisits: [],
+  visitDate: null,
+
   login: (role, trainerId = null) => {
     if (role === 'admin') {
+      localStorage.setItem('admin_authenticated', 'true');
+      localStorage.removeItem('trainer_authenticated');
       sessionStorage.setItem('admin_authenticated', 'true');
       sessionStorage.removeItem('trainer_authenticated');
       set({
@@ -271,6 +290,8 @@ export const useAppStore = create<AppState>()(
       get().addNotification('Admin Control session activated.');
     } else {
       const tid = trainerId || 't-manish';
+      localStorage.setItem('trainer_authenticated', tid);
+      localStorage.removeItem('admin_authenticated');
       sessionStorage.setItem('trainer_authenticated', tid);
       sessionStorage.removeItem('admin_authenticated');
       set({
@@ -284,6 +305,8 @@ export const useAppStore = create<AppState>()(
   },
 
   logout: () => {
+    localStorage.removeItem('admin_authenticated');
+    localStorage.removeItem('trainer_authenticated');
     sessionStorage.removeItem('admin_authenticated');
     sessionStorage.removeItem('trainer_authenticated');
     set({
@@ -371,7 +394,7 @@ export const useAppStore = create<AppState>()(
     }));
   },
 
-  markAttendance: (trainerId, status, geoTag = null, photoUrl, leaveReason) => {
+  markAttendance: (trainerId, status, geoTag = null, photoUrl, leaveReason, schoolName) => {
     const today = getToday();
     const records = get().attendance;
     const exists = records.find(r => r.trainerId === trainerId && r.date === today);
@@ -381,7 +404,7 @@ export const useAppStore = create<AppState>()(
       return;
     }
 
-    const checkInTime = status === 'present' ? new Date().toLocaleTimeString('en-IN', { hour12: false }) : null;
+    const checkInTime = status === 'present' ? getCurrentFormattedTime() : null;
     const newRecord: AttendanceRecord = {
       id: 'att-' + Math.random().toString(36).substr(2, 9),
       trainerId,
@@ -390,6 +413,7 @@ export const useAppStore = create<AppState>()(
       checkOut: null,
       workingHours: '0',
       status,
+      schoolName,
       geoTag,
       clockInLocation: geoTag,
       photoUrl,
@@ -421,16 +445,8 @@ export const useAppStore = create<AppState>()(
       return;
     }
 
-    const checkOutTime = new Date().toLocaleTimeString('en-IN', { hour12: false });
-    
-    // Calculate working hours
-    let hoursStr = '8.0';
-    if (record.checkIn) {
-      const [inH, inM, inS] = record.checkIn.split(':').map(Number);
-      const [outH, outM, outS] = checkOutTime.split(':').map(Number);
-      const diffMs = (outH * 3600 + outM * 60 + outS) - (inH * 3600 + inM * 60 + inS);
-      hoursStr = Math.max(0, (diffMs / 3600)).toFixed(1);
-    }
+    const checkOutTime = getCurrentFormattedTime();
+    const hoursStr = calculateWorkingHours(record.checkIn, checkOutTime);
 
     const updated = {
       ...record,
@@ -696,7 +712,14 @@ export const useAppStore = create<AppState>()(
         activeTrainerId: state.activeTrainerId,
         activeStateId: state.activeStateId,
         activeSchoolId: state.activeSchoolId,
-        activeVisit: state.activeVisit
+        activeVisit: state.activeVisit,
+        attendance: state.attendance,
+        feedback: state.feedback,
+        trainers: state.trainers,
+        schools: state.schools,
+        currentVisitNumber: state.currentVisitNumber,
+        todayCompletedVisits: state.todayCompletedVisits,
+        visitDate: state.visitDate
       })
     }
   )

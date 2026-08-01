@@ -20,7 +20,6 @@ import useAppStore from '../../store/useAppStore';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
-import SchoolSelect from '../../components/workspace/SchoolSelect';
 import UploadZone from '../../components/workspace/UploadZone';
 import type { UploadedMedia } from '../../components/workspace/UploadZone';
 import { uploadToDrive, deleteFromDrive } from '../../services/driveUpload';
@@ -77,27 +76,24 @@ export default function DailyLogTab() {
   const todayFeedback = useMemo(() => feedback.find((f) => f.trainerId === trainerId && f.date === today), [feedback, trainerId, today]);
 
   // Attendance local state (2 options: 'present' or 'on_leave')
-  const activeSchoolId = useAppStore((s) => s.activeSchoolId);
   const [attendanceType, setAttendanceType] = useState<'present' | 'on_leave'>('present');
-  const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(() => {
-    if (activeSchoolId && schools.some(s => s.id === activeSchoolId)) {
-      return activeSchoolId;
-    }
-    return null;
+  const [manualSchoolName, setManualSchoolName] = useState<string>(() => {
+    if (todayAtt?.schoolName) return todayAtt.schoolName;
+    return '';
   });
 
   useEffect(() => {
-    if (activeSchoolId && schools.some(s => s.id === activeSchoolId)) {
-      setSelectedSchoolId(activeSchoolId);
+    if (todayAtt?.schoolName && !manualSchoolName) {
+      setManualSchoolName(todayAtt.schoolName);
     }
-  }, [schools, activeSchoolId]);
+  }, [todayAtt?.schoolName]);
 
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [leaveReason, setLeaveReason] = useState<string>('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
-  const selectedSchool = schools.find((s) => s.id === selectedSchoolId);
   const todayDate = new Date().toISOString().split('T')[0];
 
   // Live Geo coordinates (Auto-detected location)
@@ -245,15 +241,16 @@ export default function DailyLogTab() {
             setStudentsTrained(String(liveData.totalStudentsTrained));
           }
 
-          // --- 3. SYNC SCHOOL SELECTION ---
-          if (liveData.schoolName && !selectedSchoolId) {
-            const matchedSchool = schools.find(s =>
-              s.name.toLowerCase().includes(liveData.schoolName.toLowerCase()) ||
-              liveData.schoolName.toLowerCase().includes(s.name.toLowerCase())
-            );
-            if (matchedSchool) {
-              setSelectedSchoolId(matchedSchool.id);
-            }
+          // --- 3. SYNC SCHOOL SELECTION / NAME ---
+          if (liveData.schoolName) {
+            setManualSchoolName(liveData.schoolName);
+            useAppStore.setState((state) => ({
+              attendance: state.attendance.map(r =>
+                r.trainerId === trainer.id && r.date === getToday()
+                  ? { ...r, schoolName: liveData.schoolName }
+                  : r
+              )
+            }));
           }
 
           // --- 4. SYNC FEEDBACK FORM FIELDS ---
@@ -340,13 +337,13 @@ export default function DailyLogTab() {
         saveStudentsTrained(trainerId, num);
 
         const todayFormatted = formatDate(getToday(), { day: '2-digit', month: '2-digit', year: 'numeric' });
-        const activeSchool = schools.find((s) => s.id === selectedSchoolId);
+        const currentSchoolName = manualSchoolName.trim() || todayAtt?.schoolName || '';
 
         logActivity({
           trainerName: trainer?.name || 'Trainer',
           state: trainer?.stateId || 'UP',
           district: trainer?.district || '',
-          schoolName: activeSchool?.name || (schools.length > 0 ? schools[0].name : ''),
+          schoolName: currentSchoolName,
           activityType: 'Students Trained Update',
           dateStr: todayFormatted,
           totalStudentsTrained: num,
@@ -358,15 +355,14 @@ export default function DailyLogTab() {
 
   // Submit Clock-In (Present or Leave)
   const handleAttendanceSubmit = () => {
-    const selectedSch = schools.find((s) => s.id === selectedSchoolId);
     const nowTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
     const todayFormatted = formatDate(getToday(), { day: '2-digit', month: '2-digit', year: 'numeric' });
 
     const locAddress = liveLocation?.formattedAddress || (trainer ? `${trainer.district}, ${trainer.stateId.toUpperCase()}` : 'Kanpur Dehat, Uttar Pradesh');
 
     if (attendanceType === 'present') {
-      if (!selectedSchoolId) {
-        useAppStore.getState().addToast('Please select a school first', 'error');
+      if (!manualSchoolName.trim()) {
+        useAppStore.getState().addToast('Please enter school name first', 'error');
         return;
       }
       if (!photoPreview) {
@@ -374,7 +370,25 @@ export default function DailyLogTab() {
         return;
       }
 
-      markAttendance(trainerId || '', 'present', currentLocation, photoPreview);
+      if (todayAtt && isNewVisit) {
+        useAppStore.setState((state) => ({
+          attendance: state.attendance.map((r) =>
+            r.trainerId === (trainerId || '') && r.date === getToday()
+              ? {
+                  ...r,
+                  checkIn: nowTime,
+                  checkOut: null,
+                  workingHours: '0',
+                  schoolName: manualSchoolName.trim(),
+                  photoUrl: photoPreview
+                }
+              : r
+          )
+        }));
+        useAppStore.getState().addToast(`Clocked In successfully for ${manualSchoolName.trim()}`, 'success');
+      } else {
+        markAttendance(trainerId || '', 'present', currentLocation, photoPreview, undefined, manualSchoolName.trim());
+      }
 
       const numStudents = studentsTrained ? parseInt(studentsTrained, 10) : (todayAtt?.studentsTrained ?? undefined);
 
@@ -385,16 +399,16 @@ export default function DailyLogTab() {
         activityType: 'Clock In',
         status: 'present',
         dateStr: todayFormatted,
-        isNewVisit,
+        isNewVisit: isNewVisit || todayCompletedVisits.length > 0,
         checkIn: nowTime,
         visitStartTime: nowTime,
         clockInLocation: locAddress,
-        schoolName: selectedSch?.name || (schools.length > 0 ? schools[0].name : 'Assigned School'),
-        udiseCode: selectedSch?.udiseCode || '',
+        schoolName: manualSchoolName.trim(),
+        udiseCode: '',
         totalStudentsTrained: numStudents,
         photoBase64: photoBase64 || photoPreview,
         photoName: 'Present',
-        details: `Clocked in at ${selectedSch?.name || 'School'}`
+        details: `Clocked in at ${manualSchoolName.trim()}`
       });
 
       setIsNewVisit(false);
@@ -441,14 +455,25 @@ export default function DailyLogTab() {
       }
     }
 
-    const activeSchool = schools.find((s) => s.id === selectedSchoolId);
+    const currentSchoolName = manualSchoolName.trim() || todayAtt?.schoolName || 'Assigned School';
     const numStudents = studentsTrained ? parseInt(studentsTrained, 10) : (todayAtt?.studentsTrained ?? undefined);
+
+    setTodayCompletedVisits((prev) => [
+      ...prev,
+      {
+        visitNum: prev.length + 1,
+        schoolName: currentSchoolName,
+        checkIn: todayAtt?.checkIn || nowTime,
+        checkOut: nowTime,
+        workingHours: hoursStr
+      }
+    ]);
 
     logActivity({
       trainerName: trainer?.name || 'Trainer',
       state: trainer?.stateId || 'UP',
       district: trainer?.district || '',
-      schoolName: activeSchool?.name || (schools.length > 0 ? schools[0].name : ''),
+      schoolName: currentSchoolName,
       activityType: 'Clock Out',
       dateStr: todayFormatted,
       checkOut: nowTime,
@@ -462,7 +487,7 @@ export default function DailyLogTab() {
   // Drive Media Upload Handlers
   const handleUploadFiles = async (files: FileList) => {
     if (!trainer) return;
-    const activeSchool = schools.find((s) => s.id === selectedSchoolId);
+    const currentSchoolName = manualSchoolName.trim() || todayAtt?.schoolName || '';
 
     const newUploads = Array.from(files).map((file) => {
       const id = 'media-' + Math.random().toString(36).substr(2, 9);
@@ -481,7 +506,7 @@ export default function DailyLogTab() {
         trainerName: trainer.name,
         state: trainer.stateId,
         district: trainer.district,
-        schoolName: activeSchool?.name || (schools.length > 0 ? schools[0].name : ''),
+        schoolName: currentSchoolName,
         date: todayDate,
         file,
         onProgress: (prog) => {
@@ -645,22 +670,21 @@ export default function DailyLogTab() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (trainerId) resetTodayAttendance(trainerId);
                     setIsNewVisit(true);
-                    setSelectedSchoolId(null);
+                    setManualSchoolName('');
                     setPhotoPreview(null);
                     setPhotoBase64(null);
                     setStudentsTrained('');
                     setHighlight('');
                     setLowlight('');
                     setEodFeedback('');
-                    useAppStore.getState().addToast('Ready to Clock-In for another school visit today!', 'info');
+                    useAppStore.getState().addToast(`Ready to Clock In to Next School (Visit #${todayCompletedVisits.length + 1})`, 'info');
                   }}
                   className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
-                  title="Start a new visit for another school today"
+                  title="Clock in for another school visit today"
                 >
                   <SchoolIcon size={14} />
-                  <span>+ Visit Another School Today</span>
+                  <span>+ Clock In to Next School (Visit #{todayCompletedVisits.length + 1})</span>
                 </button>
               )}
               {userRole === 'admin' && (
@@ -682,7 +706,7 @@ export default function DailyLogTab() {
           )}
         </div>
 
-        {!todayAtt ? (
+        {!todayAtt || isNewVisit ? (
           <div className="space-y-6">
             {/* Status Select: Present vs On Leave */}
             <div>
@@ -727,32 +751,42 @@ export default function DailyLogTab() {
                 animate={{ opacity: 1, height: 'auto' }}
                 className="space-y-5 p-5 bg-slate-50 border border-slate-200/80 rounded-2xl"
               >
-                {/* 1. School Dropdown */}
+                {/* 1. Manual School Input */}
                 <div>
                   <label className="block text-sm font-extrabold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-2">
                     <SchoolIcon size={18} className="text-primary-600" />
-                    <span>Select School Being Visited Today <span className="text-red-500">*</span></span>
+                    <span>Enter School Name Being Visited Today <span className="text-red-500">*</span></span>
                   </label>
-                  <SchoolSelect
-                    schools={schools}
-                    value={selectedSchoolId}
-                    onChange={(val) => {
-                      setSelectedSchoolId(val);
-                      useAppStore.setState({ activeSchoolId: val });
-                    }}
+                  <input
+                    type="text"
+                    value={manualSchoolName}
+                    onChange={(e) => setManualSchoolName(e.target.value)}
+                    placeholder="Enter school name manually (e.g. PM Shree, U.M.V. Roshanmau)..."
+                    className="w-full h-12 px-4 text-sm font-bold bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all shadow-sm"
                   />
                 </div>
 
                 {/* 2. Geotagged Photo Upload */}
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                    Capture / Upload Live Geotagged Image <span className="text-red-500">*</span>
+                    Capture Live Photo or Upload Geotagged Image <span className="text-red-500">*</span>
                   </label>
+
+                  {/* Camera Input (Live Camera) */}
                   <input
-                    ref={fileInputRef}
+                    ref={cameraInputRef}
                     type="file"
                     accept="image/*"
                     capture="environment"
+                    onChange={handlePhotoSelect}
+                    className="hidden"
+                  />
+
+                  {/* Gallery Input (Phone Gallery) */}
+                  <input
+                    ref={galleryInputRef}
+                    type="file"
+                    accept="image/*"
                     onChange={handlePhotoSelect}
                     className="hidden"
                   />
@@ -772,14 +806,25 @@ export default function DailyLogTab() {
                       </div>
                     </div>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-4 border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-2xl bg-white hover:bg-emerald-50/20 transition-all cursor-pointer text-xs font-bold text-slate-700"
-                    >
-                      <Camera size={20} className="text-emerald-600" />
-                      <span>Capture / Upload Geotagged Image</span>
-                    </button>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => cameraInputRef.current?.click()}
+                        className="flex items-center justify-center gap-3 px-5 py-4 border-2 border-dashed border-emerald-300 hover:border-emerald-500 rounded-2xl bg-white hover:bg-emerald-50/30 transition-all cursor-pointer text-xs font-bold text-emerald-800 shadow-xs"
+                      >
+                        <Camera size={20} className="text-emerald-600 shrink-0" />
+                        <span>Take Live Camera Photo</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => galleryInputRef.current?.click()}
+                        className="flex items-center justify-center gap-3 px-5 py-4 border-2 border-dashed border-blue-300 hover:border-blue-500 rounded-2xl bg-white hover:bg-blue-50/30 transition-all cursor-pointer text-xs font-bold text-blue-800 shadow-xs"
+                      >
+                        <UploadCloud size={20} className="text-blue-600 shrink-0" />
+                        <span>Choose from Gallery / Photos</span>
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -803,8 +848,8 @@ export default function DailyLogTab() {
                           'Detecting live location...'
                         ) : liveLocation ? (
                           `${liveLocation.formattedAddress} (${liveLocation.lat.toFixed(4)}° N, ${liveLocation.lng.toFixed(4)}° E)`
-                        ) : selectedSchool ? (
-                          `${selectedSchool.address || selectedSchool.name} (${(selectedSchool.latitude || currentLocation.lat).toFixed(4)}° N, ${(selectedSchool.longitude || currentLocation.lng).toFixed(4)}° E)`
+                        ) : manualSchoolName.trim() ? (
+                          `${manualSchoolName.trim()} (${currentLocation.lat.toFixed(4)}° N, ${currentLocation.lng.toFixed(4)}° E)`
                         ) : (
                           `${trainer ? trainer.district + ', Uttar Pradesh' : 'Uttar Pradesh'}, India (${currentLocation.lat.toFixed(4)}° N, ${currentLocation.lng.toFixed(4)}° E)`
                         )}
@@ -825,18 +870,18 @@ export default function DailyLogTab() {
                 {/* 4. Clock In Button */}
                 <Button
                   onClick={handleAttendanceSubmit}
-                  disabled={!selectedSchoolId || !photoPreview}
+                  disabled={!manualSchoolName.trim() || !photoPreview}
                   className={cn(
                     'w-full h-12 text-xs font-black tracking-wider uppercase rounded-xl shadow-md cursor-pointer transition-all flex items-center justify-center gap-2',
-                    selectedSchoolId && photoPreview
+                    manualSchoolName.trim() && photoPreview
                       ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                       : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                   )}
                 >
                   <Clock size={18} />
                   <span>
-                    {!selectedSchoolId
-                      ? 'Please Select School First'
+                    {!manualSchoolName.trim()
+                      ? 'Please Enter School Name First'
                       : !photoPreview
                       ? 'Please Upload Geotagged Image First'
                       : 'Clock In Now'}
@@ -983,7 +1028,7 @@ export default function DailyLogTab() {
                   <div className="flex items-center gap-2">
                     <SchoolIcon className="text-emerald-700" size={18} />
                     <span className="text-xs font-black uppercase text-emerald-900 tracking-wider">
-                      Completed Visit: {selectedSchool ? selectedSchool.name : (schools[0]?.name || 'Assigned School')}
+                      Completed Visit: {manualSchoolName.trim() || todayAtt.schoolName || 'Entered School'}
                     </span>
                   </div>
                   <span className="text-xs font-bold text-emerald-700 bg-white px-2.5 py-0.5 rounded-md border border-emerald-200">
@@ -1040,15 +1085,10 @@ export default function DailyLogTab() {
               <div>
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Visited School Today</span>
                 <span className="text-xs font-extrabold text-slate-800">
-                  {selectedSchool ? selectedSchool.name : 'Selected in Attendance above'}
+                  {manualSchoolName.trim() || todayAtt?.schoolName || 'Entered in Attendance above'}
                 </span>
               </div>
             </div>
-            {selectedSchool && (
-              <span className="text-[11px] font-bold text-slate-500 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
-                UDISE: {selectedSchool.udiseCode}
-              </span>
-            )}
           </div>
 
           <div className="border-t border-slate-200/60 pt-3">

@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
-import { Calendar, ClipboardCheck, LogOut, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Calendar, ClipboardCheck, Clock, LogOut, ArrowLeft, ShieldCheck } from 'lucide-react';
 import useAppStore from '../../store/useAppStore';
 import { cn } from '../../lib/utils';
 
@@ -30,14 +30,22 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       label: 'FIELD OPERATIONS',
       items: [
         {
+          label: 'Attendance',
+          path: `${basePath}/attendance`,
+          icon: Clock,
+          active: location.pathname.includes('/attendance')
+        },
+        {
           label: 'Daily Field Log',
           path: `${basePath}/daily-log`,
+          icon: ClipboardCheck,
+          active: location.pathname.includes('/daily-log')
+        },
+        {
+          label: 'Schedule Monthly Calendar',
+          path: `${basePath}/calendar`,
           icon: Calendar,
-          active:
-            location.pathname.includes('/daily-log') ||
-            location.pathname.includes('/attendance') ||
-            location.pathname.includes('/visits') ||
-            location.pathname.includes('/feedback')
+          active: location.pathname.includes('/calendar')
         }
       ]
     }

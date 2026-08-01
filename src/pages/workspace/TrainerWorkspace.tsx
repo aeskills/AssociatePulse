@@ -47,7 +47,7 @@ export default function TrainerWorkspace() {
   const avatarGradient = getDeterministicGradient(trainer.name);
   const attendanceBadge = getAttendanceBadge(trainer.id);
 
-  const isAdminInspector = sessionStorage.getItem('admin_authenticated') === 'true';
+  const isAdminInspector = localStorage.getItem('admin_authenticated') === 'true' || sessionStorage.getItem('admin_authenticated') === 'true';
 
   return (
     <PageTransition>
