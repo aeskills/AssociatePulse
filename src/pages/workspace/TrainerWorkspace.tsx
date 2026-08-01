@@ -85,37 +85,23 @@ export default function TrainerWorkspace() {
 
         {/* Trainer Profile Header — clean MyAT style */}
         <Card padding="p-5">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-            <div className="flex items-center gap-4">
-              <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${avatarGradient} flex items-center justify-center text-white font-black text-xl shadow-md flex-shrink-0`}>
-                {getInitials(trainer.name)}
-              </div>
-              <div>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{trainer.name}</h1>
+          <div className="flex items-center gap-4">
+            <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${avatarGradient} flex items-center justify-center text-white font-black text-xl shadow-md flex-shrink-0`}>
+              {getInitials(trainer.name)}
+            </div>
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{trainer.name}</h1>
+                {attendanceBadge.label !== 'Not Checked-In' && (
                   <Badge color={attendanceBadge.color} dot>
                     {attendanceBadge.label}
                   </Badge>
-                </div>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-slate-600 font-semibold">
-                  <span className="flex items-center gap-1.5"><MapPin size={14} className="text-slate-500" />{trainer.district}</span>
-                  <span>·</span>
-                  <span className="flex items-center gap-1.5"><Calendar size={14} className="text-slate-500" />{formatDate(getToday(), { weekday: 'long', day: 'numeric', month: 'short' })}</span>
-                  {trainer.employeeId && (
-                    <>
-                      <span>·</span>
-                      <span className="font-mono text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{trainer.employeeId}</span>
-                    </>
-                  )}
-                </div>
+                )}
               </div>
-            </div>
-
-            {/* Micro KPIs */}
-            <div className="flex items-center pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-              <div className="text-center sm:text-right">
-                <span className="text-xl font-black text-slate-900 block leading-tight">{trainerSchools.length}</span>
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mt-0.5">Assigned Schools</span>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-slate-600 font-semibold">
+                <span className="flex items-center gap-1.5"><MapPin size={14} className="text-slate-500" />{trainer.district}</span>
+                <span>·</span>
+                <span className="flex items-center gap-1.5"><Calendar size={14} className="text-slate-500" />{formatDate(getToday(), { weekday: 'long', day: 'numeric', month: 'short' })}</span>
               </div>
             </div>
           </div>

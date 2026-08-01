@@ -63,7 +63,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <div
         className="flex items-center gap-2.5 cursor-pointer pb-5 border-b border-slate-800/50 mb-5"
         onClick={() => {
-          navigate(basePath + '/daily-log');
+          navigate(basePath + '/attendance');
           onClose();
         }}
       >

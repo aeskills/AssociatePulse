@@ -56,7 +56,7 @@ export default function AttendanceTab() {
   const today = getToday();
 
   // Attendance local state
-  const [attendanceType, setAttendanceType] = useState<'present' | 'on_leave'>('present');
+  const [attendanceType, setAttendanceType] = useState<'present' | 'on_leave' | null>(null);
   const [manualSchoolName, setManualSchoolName] = useState<string>(() => {
     if (todayAtt?.schoolName) return todayAtt.schoolName;
     return '';
@@ -360,28 +360,28 @@ export default function AttendanceTab() {
                   type="button"
                   onClick={() => setAttendanceType('present')}
                   className={cn(
-                    'flex items-center justify-center gap-3 p-4.5 rounded-2xl border-2 transition-all cursor-pointer font-black text-base',
+                    'flex items-center justify-center gap-2.5 p-4 rounded-2xl border-2 transition-all cursor-pointer font-black text-base',
                     attendanceType === 'present'
-                      ? 'border-emerald-500 bg-emerald-50/60 text-emerald-800 shadow-sm'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                      ? 'border-emerald-600 bg-emerald-50 text-emerald-900 shadow-sm'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                   )}
                 >
-                  <CheckCircle2 size={22} className={attendanceType === 'present' ? 'text-emerald-600' : 'text-slate-400'} />
-                  <span>Clock In (Present Today)</span>
+                  <CheckCircle2 size={20} className={attendanceType === 'present' ? 'text-emerald-600' : 'text-slate-400'} />
+                  <span>Present</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setAttendanceType('on_leave')}
                   className={cn(
-                    'flex items-center justify-center gap-3 p-4.5 rounded-2xl border-2 transition-all cursor-pointer font-black text-base',
+                    'flex items-center justify-center gap-2.5 p-4 rounded-2xl border-2 transition-all cursor-pointer font-black text-base',
                     attendanceType === 'on_leave'
-                      ? 'border-amber-500 bg-amber-50/60 text-amber-800 shadow-sm'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                      ? 'border-amber-500 bg-amber-50 text-amber-900 shadow-sm'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                   )}
                 >
-                  <FileText size={22} className={attendanceType === 'on_leave' ? 'text-amber-600' : 'text-slate-400'} />
-                  <span>Apply On Leave</span>
+                  <FileText size={20} className={attendanceType === 'on_leave' ? 'text-amber-600' : 'text-slate-400'} />
+                  <span>Leave</span>
                 </button>
               </div>
             </div>

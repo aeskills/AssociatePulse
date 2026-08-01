@@ -40,7 +40,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     if (routeTrainerId && routeTrainerId !== trainerAuthId) {
       const myTrainer = trainers.find((t) => t.id === trainerAuthId);
       const myStateId = myTrainer?.stateId || 'up';
-      return <Navigate to={`/dashboard/state/${myStateId}/trainer/${trainerAuthId}/daily-log`} replace />;
+      return <Navigate to={`/dashboard/state/${myStateId}/trainer/${trainerAuthId}/attendance`} replace />;
     }
   }
 

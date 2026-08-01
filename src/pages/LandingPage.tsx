@@ -55,7 +55,7 @@ export default function LandingPage() {
         login('trainer', matchedTrainer.id);
         addToast(`Welcome back, ${matchedTrainer.name}! Logged in successfully.`, 'success');
         setIsSubmitting(false);
-        navigate(`/dashboard/state/${matchedTrainer.stateId}/trainer/${matchedTrainer.id}/daily-log`);
+        navigate(`/dashboard/state/${matchedTrainer.stateId}/trainer/${matchedTrainer.id}/attendance`);
       }, 400);
     } else {
       setTimeout(() => {

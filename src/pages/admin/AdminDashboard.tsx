@@ -740,7 +740,7 @@ export default function AdminDashboard() {
                   <div className="pt-3 border-t border-slate-100 flex items-center gap-2">
                     {/* View / Go Inside Trainer Workspace */}
                     <button
-                      onClick={() => navigate(`/dashboard/state/${trainer.stateId}/trainer/${trainer.id}/daily-log`)}
+                      onClick={() => navigate(`/dashboard/state/${trainer.stateId}/trainer/${trainer.id}/attendance`)}
                       className="flex-1 h-10 px-4 bg-red-600 hover:bg-red-700 text-white text-xs font-black tracking-wide uppercase rounded-xl transition-all shadow-sm shadow-red-500/15 flex items-center justify-center gap-2 cursor-pointer"
                       title="Enter Trainer Workspace"
                     >
